@@ -1,3 +1,5 @@
+<img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=a8e6cf&section=header" width="100%" alt="footer-waves" />
+
 # Planificador de Comidas
 
 App web para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de la compra automáticamente y lleva el control de la despensa.
@@ -97,3 +99,5 @@ cp .env.example .env
 ```
 
 Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archivo [.env.example](.env.example) incluye una descripción de para qué sirve cada variable.
+
+<img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=a8e6cf&section=footer" width="100%" alt="footer-waves" />
