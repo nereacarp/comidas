@@ -3,8 +3,7 @@
 App web para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de la compra automáticamente y lleva el control de la despensa.
 
 <p>
-  <img width="49%" alt="auth" src="https://github.com/user-attachments/assets/42e18a08-5e51-4575-a864-0f2cc0c93fdb" />
-  <img width="49%" alt="dashboard" src="https://github.com/user-attachments/assets/c70c7fc3-3be1-416a-99e3-c9acfb1cf266" />
+  <img width="1920" height="898" alt="dashboard" src="https://github.com/user-attachments/assets/9fca1ffe-e62b-4342-b1ec-611888daf820" />
 </p>
 
 ## Funcionalidades
@@ -17,11 +16,14 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 - **Hogares compartidos:** varios usuarios pueden colaborar en el mismo hogar con distintos permisos y favoritos individuales.
 
 <p>
-  <img width="19%" alt="recetas" src="https://github.com/user-attachments/assets/6748dff5-f3f8-4ea1-bb90-cb9dec639b78" />
-  <img width="19%" alt="plan" src="https://github.com/user-attachments/assets/63148532-4d1c-49ad-9c95-c18465edc338" />
-  <img width="19%" alt="despensa" src="https://github.com/user-attachments/assets/8e9be5ec-f7e0-4337-8bf4-f15dcae7d858" />
-  <img width="19%" alt="lista" src="https://github.com/user-attachments/assets/e8bb67df-7b7e-4836-9ff5-11d1f9d08d99" />
-  <img width="19%" alt="salud" src="https://github.com/user-attachments/assets/23eae776-70c5-4aaf-86a6-c026aceaf661" />
+  <img width="32%" alt="auth" src="https://github.com/user-attachments/assets/42e18a08-5e51-4575-a864-0f2cc0c93fdb" />
+  <img width="32%" alt="recetas" src="https://github.com/user-attachments/assets/6748dff5-f3f8-4ea1-bb90-cb9dec639b78" />
+  <img width="32%" alt="plan" src="https://github.com/user-attachments/assets/63148532-4d1c-49ad-9c95-c18465edc338" />
+</p>
+<p>
+  <img width="32%" alt="despensa" src="https://github.com/user-attachments/assets/8e9be5ec-f7e0-4337-8bf4-f15dcae7d858" />
+  <img width="32%" alt="lista" src="https://github.com/user-attachments/assets/e8bb67df-7b7e-4836-9ff5-11d1f9d08d99" />
+  <img width="32%" alt="salud" src="https://github.com/user-attachments/assets/23eae776-70c5-4aaf-86a6-c026aceaf661" />
 </p>
 
 ## Stack técnico
