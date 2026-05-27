@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -19,10 +19,17 @@ import { AppLayout } from './layouts/AppLayout';
 import { LegacyHouseholdRedirect } from './components/LegacyHouseholdRedirect';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { useAuthStore } from './stores/auth.store';
+
+function RootRedirect() {
+  const token = useAuthStore((s) => s.token);
+  return <Navigate to={token ? '/dashboard' : '/login'} replace />;
+}
 
 export function App() {
   return (
     <Routes>
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/shared/:token" element={<SharedShoppingListPage />} />
