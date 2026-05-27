@@ -7,3 +7,7 @@ coverage/
 .turbo/
 .initialized
 .claude/
+.agents/
+skills-lock.json
+CLAUDE.md
+*.png
