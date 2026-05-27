@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: comidas
+      POSTGRES_PASSWORD: comidas
+      POSTGRES_DB: comidas
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comidas -d comidas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: sh -c "pnpm db:generate && pnpm dev"
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://comidas:comidas@db:5432/comidas
+      JWT_SECRET: dev-secret-change-in-production
+      PORT: "3001"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5175:5173"
+    environment:
+      VITE_API_URL: http://localhost:3001
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+
+  backoffice:
+    build:
+      context: ./backoffice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5176:5174"
+    environment:
+      VITE_API_URL: http://localhost:3001
+    volumes:
+      - ./backoffice/src:/app/src
+
+volumes:
+  pgdata:

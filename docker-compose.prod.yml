@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: comidas
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: comidas
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comidas -d comidas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://comidas:${DB_PASSWORD}@db:5432/comidas
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: "3001"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ADMIN_SECRET: ${ADMIN_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: http://${SERVER_IP}:3001
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backoffice:
+    build:
+      context: ./backoffice
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: http://${SERVER_IP}:3001
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:

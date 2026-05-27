@@ -1,0 +1,5 @@
+{
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": ["**/*.test.{ts,tsx}", "src/test/**"],
+  "ignoreDependencies": ["autoprefixer", "@refinedev/cli", "@vitest/coverage-v8"]
+}
