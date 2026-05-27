@@ -2,8 +2,6 @@
 
 App web para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de la compra automáticamente y lleva el control de la despensa.
 
----
-
 ## Funcionalidades
 
 - **Recetas:** crea, edita e importa recetas con IA, calcula calorías automáticamente y guarda favoritas.
@@ -12,8 +10,6 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 - **Despensa:** controla lo que tienes en casa por ubicaciones y actualízala automáticamente con las compras.
 - **Salud:** seguimiento de agua, calorías, peso y objetivos de pérdida de peso con cálculos personalizados.
 - **Hogares compartidos:** varios usuarios pueden colaborar en el mismo hogar con distintos permisos y favoritos individuales.
-
----
 
 ## Stack técnico
 
@@ -29,7 +25,6 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 | Infraestructura | Docker · Docker Compose | Levanta todos los servicios (backend, frontend, base de datos) con un solo comando |
 | Testing | Vitest | Tests unitarios del backend y del frontend |
 
----
 
 ## Estructura del proyecto
 
@@ -72,18 +67,18 @@ Una vez arrancado:
 Puedes crear una cuenta desde la propia app o usar la cuenta de demo:
 
 ```
-Email:      demo@comidas.app
+Email: demo@comidas.app
 Contraseña: comidas123
 ```
 
----
-
 ## Variables de entorno
 
-Copia `.env.example` a `.env` y rellena los valores:
+_(Datos sensibles que la app necesita para funcionar pero que no se guardan en el código por seguridad)_
+
+El proyecto incluye un archivo `.env.example` con todas las variables necesarias pero sin valores reales. Antes de arrancar la app tienes que crear tu propio archivo `.env` copiando ese ejemplo y rellenando los valores:
 
 ```bash
 cp .env.example .env
 ```
 
-Ver [.env.example](.env.example) para la descripción de cada variable.
+Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archivo [.env.example](.env.example) incluye una descripción de para qué sirve cada variable.
