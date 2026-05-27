@@ -29,16 +29,16 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 ## Stack técnico
 
 | Capa | Tecnología |
-|------|-----------|
-| Backend | Node.js · Fastify |
-| ORM | Prisma |
-| Base de datos | PostgreSQL |
-| Frontend | React 19 · Vite |
-| Estado global | Zustand |
-| Estilos | Tailwind CSS |
-| IA | Google Gemini (recetas) |
-| Infraestructura | Docker · Docker Compose |
-| Testing | Vitest |
+| :--- | :--- |
+| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" /> <img src="https://img.shields.io/badge/Fastify-000000?style=flat-square&logo=fastify&logoColor=white" /> |
+| **ORM** | <img src="https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white" /> |
+| **Base de datos** | <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white" /> |
+| **Frontend** | <img src="https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB" /> <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" /> |
+| **Estado global** | <img src="https://img.shields.io/badge/Zustand-443E38?style=flat-square&logo=ghost&logoColor=white" /> |
+| **Estilos** | <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" /> |
+| **IA** | <img src="https://img.shields.io/badge/Google_Gemini-8E75C2?style=flat-square&logo=googlegemini&logoColor=white" /> |
+| **Infraestructura** | <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" /> <img src="https://img.shields.io/badge/Compose-2496ED?style=flat-square&logo=docker&logoColor=white" /> |
+| **Testing** | <img src="https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white" /> |
 
 
 ## Estructura del proyecto
