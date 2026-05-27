@@ -29,6 +29,7 @@ services:
       JWT_SECRET: dev-secret-change-in-production
       PORT: "3001"
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ADMIN_SECRET: ${ADMIN_SECRET:-dev-admin}
     depends_on:
       db:
         condition: service_healthy
@@ -51,17 +52,6 @@ services:
       - ./frontend/index.html:/app/index.html
       - ./frontend/vite.config.ts:/app/vite.config.ts
 
-  backoffice:
-    build:
-      context: ./backoffice
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "5176:5174"
-    environment:
-      VITE_API_URL: http://localhost:3001
-    volumes:
-      - ./backoffice/src:/app/src
 
 volumes:
   pgdata:

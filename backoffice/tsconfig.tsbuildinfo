@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/adminlogin.tsx","./src/lib/admindataprovider.ts","./src/pages/householdlist.tsx","./src/pages/recipelist.tsx","./src/pages/taglist.tsx","./src/pages/userlist.tsx","./src/test/setup.ts","./vite-env.d.ts"],"version":"5.9.3"}
