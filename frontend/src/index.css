@@ -446,7 +446,7 @@
   }
 
   .auth-shell__inner {
-    @apply mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-center lg:gap-12 xl:max-w-6xl;
+    @apply mx-auto grid w-full max-w-sm gap-8 lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-center lg:gap-12 xl:max-w-6xl;
   }
 
   .auth-shell__intro {
