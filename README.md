@@ -6,54 +6,28 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 
 ## Funcionalidades
 
-### Recetas
-- Crea y edita recetas con ingredientes, tiempos de preparación y raciones
-- Filtra por tipo de comida, tags, calorías o tiempo
-- Importa recetas desde cualquier URL con IA (Gemini)
-- Estimación automática de calorías a partir de los ingredientes
-- Marca recetas como favoritas
-
-### Plan de comidas
-- Calendario semanal y mensual para asignar recetas a cada día
-- Tipos de comida: Desayuno, Comida, Cena, Snack, Postre
-- También puedes anotar cuando comes fuera
-- Copia días o semanas enteras con un clic
-
-### Lista de la compra
-- Generación automática a partir del plan de comidas de la semana
-- Agrupa ingredientes repetidos entre recetas
-- Añade artículos manuales
-- Marca artículos como comprados y descuéntalos de la despensa automáticamente
-- Comparte la lista con un enlace público (sin necesidad de cuenta)
-
-### Despensa
-- Inventario de lo que tienes en casa, organizado por ubicaciones (nevera, armario...)
-- Se actualiza automáticamente cuando marcas compras o puedes añadir tú comida manualmente
-
-### Salud
-- Seguimiento de la cantidad necesaria que hay que beber al dia
-- Calcula tu TMB y TDEE según tus datos
-- Planifica déficit calórico para perder peso
-- Seguimiento de peso con proyecciones (todo lo de calorías se puede desactivar)
-
-### Hogares compartidos
-- Varios usuarios pueden compartir el mismo hogar
-- Invita a miembros por email con diferentes roles (editor/visor)
-- Cada usuario tiene sus propios favoritos
+- **Recetas:** crea, edita e importa recetas con IA, calcula calorías automáticamente y guarda favoritas.
+- **Plan de comidas:** organiza desayunos, comidas y cenas en un calendario semanal o mensual, incluso días fuera de casa.
+- **Lista de la compra:** se genera automáticamente según tu menú, agrupa ingredientes repetidos y permite compartirla fácilmente.
+- **Despensa:** controla lo que tienes en casa por ubicaciones y actualízala automáticamente con las compras.
+- **Salud:** seguimiento de agua, calorías, peso y objetivos de pérdida de peso con cálculos personalizados.
+- **Hogares compartidos:** varios usuarios pueden colaborar en el mismo hogar con distintos permisos y favoritos individuales.
 
 ---
 
 ## Stack técnico
 
-| Capa | Tecnología |
-|------|-----------|
-| Backend | Node.js · Fastify · Prisma ORM |
-| Base de datos | PostgreSQL |
-| Frontend | React 19 · Vite · Zustand · Tailwind CSS |
-| Backoffice | Refine (panel de administración) |
-| IA | Google Gemini (importación de recetas) |
-| Infraestructura | Docker · Docker Compose |
-| Testing | Vitest |
+| Capa | Tecnología | Para qué se usa |
+|------|-----------|-----------------|
+| Backend | Node.js · Fastify | Servidor que expone la API REST que consume el frontend |
+| ORM | Prisma | Hace las consultas a la base de datos de forma tipada y segura |
+| Base de datos | PostgreSQL | Almacena todos los datos de la app |
+| Frontend | React 19 · Vite | Interfaz de usuario |
+| Estado global | Zustand | Gestiona el token de sesión, los filtros de recetas y el estado de conexión |
+| Estilos | Tailwind CSS | Estilos de la interfaz mediante clases de utilidad |
+| IA | Google Gemini | Extrae automáticamente los datos de una receta a partir de una URL |
+| Infraestructura | Docker · Docker Compose | Levanta todos los servicios (backend, frontend, base de datos) con un solo comando |
+| Testing | Vitest | Tests unitarios del backend y del frontend |
 
 ---
 
@@ -61,39 +35,46 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 
 ```
 comidas/
-├── backend/          # API REST (Fastify)
+├── backend/               # Servidor API REST hecho con Fastify
 │   ├── src/
-│   │   ├── routes/   # Endpoints HTTP
-│   │   ├── services/ # Lógica de negocio
-│   │   └── lib/      # Utilidades y cliente Prisma
-│   └── prisma/       # Schema y migraciones
-├── frontend/         # App web (React)
+│   │   ├── routes/        # Define los endpoints HTTP (qué URL hace qué)
+│   │   ├── services/      # Lógica de negocio separada de las rutas (más fácil de testear)
+│   │   └── lib/           # Utilidades compartidas y cliente de Prisma
+│   └── prisma/            # Schema de la base de datos y migraciones
+├── frontend/              # Aplicación web hecha con React
 │   └── src/
-│       ├── pages/    # Vistas principales
-│       ├── components/
-│       ├── stores/   # Estado global (Zustand)
-│       └── api/      # Cliente HTTP
-├── backoffice/       # Panel de administración (Refine)
-└── docker-compose.yml
+│       ├── pages/         # Cada página de la app (recetas, plan, despensa...)
+│       ├── components/    # Componentes reutilizables (botones, modales, formularios...)
+│       ├── stores/        # Estado global con Zustand (sesión, filtros...)
+│       └── api/           # Funciones que llaman al backend
+└── docker-compose.yml     # Orquesta todos los servicios para arrancarlos juntos
 ```
 
 ---
 
 ## Ejecutar en local
 
-Requisitos: [Docker](https://www.docker.com/) y Docker Compose.
+Solo necesitas tener instalado [Docker](https://www.docker.com/).
 
 ```bash
-git clone https://github.com/nereacarpinterob/comidas
+git clone https://github.com/nereacarp/comidas
 cd comidas
 docker compose up
 ```
 
+Una vez arrancado:
+
 | Servicio | URL |
 |----------|-----|
 | Frontend | http://localhost:5175 |
-| Backoffice | http://localhost:5176 |
 | API | http://localhost:3001 |
+
+Puedes crear una cuenta desde la propia app o usar la cuenta de demo:
+
+```
+Email:      demo@comidas.app
+Contraseña: comidas123
+```
 
 ---
 
