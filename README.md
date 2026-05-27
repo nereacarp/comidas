@@ -13,36 +13,36 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 
 ## Stack técnico
 
-| Capa | Tecnología | Para qué se usa |
-|------|-----------|-----------------|
-| Backend | Node.js · Fastify | Servidor que expone la API REST que consume el frontend |
-| ORM | Prisma | Hace las consultas a la base de datos de forma tipada y segura |
-| Base de datos | PostgreSQL | Almacena todos los datos de la app |
-| Frontend | React 19 · Vite | Interfaz de usuario |
-| Estado global | Zustand | Gestiona el token de sesión, los filtros de recetas y el estado de conexión |
-| Estilos | Tailwind CSS | Estilos de la interfaz mediante clases de utilidad |
-| IA | Google Gemini | Extrae automáticamente los datos de una receta a partir de una URL |
-| Infraestructura | Docker · Docker Compose | Levanta todos los servicios (backend, frontend, base de datos) con un solo comando |
-| Testing | Vitest | Tests unitarios del backend y del frontend |
+| Capa | Tecnología |
+|------|-----------|
+| Backend | Node.js · Fastify |
+| ORM | Prisma |
+| Base de datos | PostgreSQL |
+| Frontend | React 19 · Vite |
+| Estado global | Zustand |
+| Estilos | Tailwind CSS |
+| IA | Google Gemini (recetas) |
+| Infraestructura | Docker · Docker Compose |
+| Testing | Vitest |
 
 
 ## Estructura del proyecto
 
 ```
 comidas/
-├── backend/               # Servidor API REST hecho con Fastify
+├── backend/               # Servidor (Fastify)
 │   ├── src/
-│   │   ├── routes/        # Define los endpoints HTTP (qué URL hace qué)
-│   │   ├── services/      # Lógica de negocio separada de las rutas (más fácil de testear)
-│   │   └── lib/           # Utilidades compartidas y cliente de Prisma
-│   └── prisma/            # Schema de la base de datos y migraciones
-├── frontend/              # Aplicación web hecha con React
+│   │   ├── routes/        # Endpoints HTTP
+│   │   ├── services/      # Lógica de negocio
+│   │   └── lib/           # Funciones auxiliares
+│   └── prisma/            # Base de datos
+├── frontend/              # Aplicación web (React)
 │   └── src/
-│       ├── pages/         # Cada página de la app (recetas, plan, despensa...)
-│       ├── components/    # Componentes reutilizables (botones, modales, formularios...)
-│       ├── stores/        # Estado global con Zustand (sesión, filtros...)
+│       ├── pages/         # Cada página de la app
+│       ├── components/    # Componentes reutilizables
+│       ├── stores/        # Estado global (Zustand)
 │       └── api/           # Funciones que llaman al backend
-└── docker-compose.yml     # Orquesta todos los servicios para arrancarlos juntos
+└── docker-compose.yml     # Arranca todo
 ```
 
 ---
