@@ -211,7 +211,7 @@
 
 @layer components {
   .type-page-title {
-    @apply text-2xl font-bold tracking-tight text-ink sm:text-3xl;
+    @apply font-display text-2xl sm:text-[1.65rem] font-bold tracking-tight text-ink;
   }
 
   .type-section-title {

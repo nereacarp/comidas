@@ -119,7 +119,7 @@ export function HealthPage() {
 
   return (
     <div className="space-y-5">
-      <h2 className="type-section-title">Salud</h2>
+      <h1 className="type-page-title">Salud</h1>
 
       <Card className="p-5 sm:p-6">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Preferencias de tu cuenta</h2>
