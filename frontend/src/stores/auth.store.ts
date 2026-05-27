@@ -18,6 +18,12 @@ interface AuthState {
 
 const authApi = createAuthApi(apiClient);
 
+function isNetworkError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message.toLowerCase();
+  return msg === 'failed to fetch' || msg.includes('networkerror') || msg.includes('network error');
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: localStorage.getItem('token'),
@@ -31,7 +37,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', token);
       set({ user: applyLocalPreferences(user), token, isLoading: false });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
+      const message = isNetworkError(error)
+        ? 'No se ha podido conectar. Comprueba tu conexión.'
+        : 'Email o contraseña incorrectos.';
       set({ error: message, isLoading: false });
       throw error;
     }
@@ -44,7 +52,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('token', token);
       set({ user: applyLocalPreferences(user), token, isLoading: false });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al registrarse';
+      const message = isNetworkError(error)
+        ? 'No se ha podido conectar. Comprueba tu conexión.'
+        : 'Email o contraseña incorrectos.';
       set({ error: message, isLoading: false });
       throw error;
     }
