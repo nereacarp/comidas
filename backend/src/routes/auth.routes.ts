@@ -33,7 +33,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     try {
       const user = await authService.register(parsed.data);
-      const token = fastify.jwt.sign({ id: user.id, email: user.email });
+      const token = fastify.jwt.sign({ id: user.id, email: user.email }, { expiresIn: '30d' });
       return reply.status(201).send({ user, token });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error en el registro';
@@ -58,7 +58,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     try {
       const user = await authService.login(parsed.data);
       authRateLimiter.loginSucceeded(email);
-      const token = fastify.jwt.sign({ id: user.id, email: user.email });
+      const token = fastify.jwt.sign({ id: user.id, email: user.email }, { expiresIn: '30d' });
       return reply.send({ user, token });
     } catch (error) {
       authRateLimiter.loginFailed(email);

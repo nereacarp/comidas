@@ -20,6 +20,9 @@ import { LegacyHouseholdRedirect } from './components/LegacyHouseholdRedirect';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { useAuthStore } from './stores/auth.store';
+import { registerUnauthorizedHandler } from './api/client';
+
+registerUnauthorizedHandler(() => useAuthStore.getState().logout());
 
 function RootRedirect() {
   const token = useAuthStore((s) => s.token);

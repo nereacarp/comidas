@@ -1,6 +1,11 @@
 /** Empty string = same-origin (Vite dev proxy). Otherwise direct API URL. */
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
+let _onUnauthorized: (() => void) | null = null;
+export function registerUnauthorizedHandler(fn: () => void) {
+  _onUnauthorized = fn;
+}
+
 export interface ApiClient {
   get: <T>(path: string, signal?: AbortSignal) => Promise<T>;
   post: <T>(path: string, body?: unknown, signal?: AbortSignal) => Promise<T>;
@@ -33,6 +38,9 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     const message = error.error || error.message || `HTTP ${response.status}`;
+    if (response.status === 401 && getToken()) {
+      _onUnauthorized?.();
+    }
     if (response.status === 404) {
       throw new Error(
         `${message}. Comprueba que el backend está en marcha (puerto 3001 con Docker).`
