@@ -81,7 +81,11 @@ Una vez arrancado:
 | Frontend | http://localhost:5175 |
 | API | http://localhost:3001 |
 
-Puedes crear una cuenta desde la propia app o usar la cuenta de demo:
+Puedes crear una cuenta desde la propia app o cargar los datos de demo con:
+
+```bash
+docker compose exec backend pnpm db:seed
+```
 
 ```
 Email: demo@comidas.app
