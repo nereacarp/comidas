@@ -47,26 +47,48 @@ App web para planificar menús semanales/mensuales en familia o individual. Gest
 
 ```
 comidas/
-├── backend/               # Servidor (Fastify)
+├── backend/               # API (Node + Fastify + Prisma)
 │   ├── src/
 │   │   ├── routes/        # Endpoints HTTP
 │   │   ├── services/      # Lógica de negocio
 │   │   └── lib/           # Funciones auxiliares
-│   └── prisma/            # Base de datos
-├── frontend/              # Aplicación web (React)
+│   └── prisma/            # Esquema, migraciones y datos de demo (seed)
+├── frontend/              # App web (React + Vite)
 │   └── src/
 │       ├── pages/         # Cada página de la app
 │       ├── components/    # Componentes reutilizables
+│       ├── hooks/         # Hooks de React
+│       ├── lib/           # Utilidades y lógica de dominio
 │       ├── stores/        # Estado global (Zustand)
-│       └── api/           # Funciones que llaman al backend
-└── docker-compose.yml     # Arranca todo
+│       └── api/           # Llamadas al backend
+├── backoffice/            # Panel de administración
+├── deploy/                # Docker de producción, Caddy y scripts de copias
+├── docs/                  # Documentación
+├── tests/e2e/             # Tests end-to-end (Playwright)
+├── docker-compose.yml     # Entorno de desarrollo
+└── start.bat              # Arranque con un doble clic (Windows)
 ```
+
+---
+
+## 🚀 Web en vivo
+
+La app está desplegada en producción:
+
+| Entorno | URL |
+|---------|-----|
+| **Frontend** | https://comidas-frontend.vercel.app |
+| **Backend API** | https://comidas-backend.vercel.app |
+
+**Usuario demo:**
+- Email: `demo@comidas.app`
+- Contraseña: `comidas123`
 
 ---
 
 ## Ejecutar en local
 
-Solo necesitas tener instalado [Docker](https://www.docker.com/).
+Solo necesitas tener instalado [Docker](https://www.docker.com/). En Windows también puedes hacer doble clic en `start.bat`.
 
 ```bash
 git clone https://github.com/nereacarp/comidas
@@ -102,6 +124,14 @@ El proyecto incluye un archivo `.env.example` con todas las variables necesarias
 cp .env.example .env
 ```
 
-Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archivo [.env.example](.env.example) incluye una descripción de para qué sirve cada variable.
+Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archivo [.env.example](.env.example) incluye una descripción de para qué sirve cada variable. Si ejecutas cada parte fuera de Docker, `backend/`, `frontend/` y `backoffice/` tienen también su propio `.env.example`.
+
+## Documentación
+
+Guías de despliegue, producción y pruebas en [`docs/`](docs/README.md).
+
+## Licencia
+
+[MIT](LICENSE)
 
 <img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=a8e6cf&section=footer" width="100%" alt="footer-waves" />
