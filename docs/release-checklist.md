@@ -1,47 +1,61 @@
-# Pruebas antes de publicar
+# Checklist antes de publicar
 
-## Despliegue y túnel del backoffice
+## Requisitos previos
 
-El backoffice se sirve únicamente en `127.0.0.1:8080`. Abre el túnel:
+- Cambios commiteados y pusheados a `main`
+- Vercel CLI instalada (`npm install -g vercel`)
+- Acceso a cuentas de Vercel y Neon
 
-```bash
-ssh -L 8080:127.0.0.1:8080 comidas@servidor.example.com
-```
+## Backend (Vercel Serverless)
 
-La interfaz y su API administrativa viajan por ese mismo túnel mediante `/admin-api`; el puerto 3001 no se expone. Con el túnel abierto, comprueba frontend, API, backoffice y proxy:
+- [ ] Base de datos: migraciones ejecutadas en Neon
+  ```bash
+  DIRECT_URL=<neon-direct-url> pnpm --dir backend db:migrate:deploy
+  ```
+- [ ] Variables de producción configuradas en Vercel:
+  - `DATABASE_URL` (Neon con -pooler)
+  - `DIRECT_URL` (Neon directa)
+  - `JWT_SECRET` (aleatorio 64 bytes)
+  - `ADMIN_CREDENTIALS_JSON` (secreto admin)
+  - `ALLOWED_ORIGINS` (URL del frontend)
+  - `APP_URL` (URL del frontend)
+  - `PUBLIC_REGISTRATION=false`
+  - `REQUIRE_EMAIL_VERIFICATION=false`
+- [ ] Build compila sin errores: `cd backend && pnpm build`
+- [ ] Despliegue: `cd backend && vercel deploy --prod`
+- [ ] Salud del backend: `curl https://<backend>.vercel.app/health`
 
-```bash
-PUBLIC_URL=https://comidas.example.com BACKOFFICE_URL=http://localhost:8080 \
-  ./deploy/check-deployment.sh
-```
+## Frontend (Vercel Static + Rewrites)
 
-## Copia y restauración
+- [ ] Variables de producción configuradas:
+  - `BACKEND_URL` (URL del backend)
+  - `VITE_LEGAL_OPERATOR` (responsable legal)
+  - `VITE_LEGAL_CONTACT` (correo de privacidad)
+- [ ] Build compila sin errores: `cd frontend && pnpm build`
+- [ ] `vercel.json` contiene rewrites para `/api/*` → backend
+- [ ] Despliegue: `cd frontend && vercel deploy --prod`
+- [ ] Frontend carga: `https://<frontend>.vercel.app`
 
-```bash
-./deploy/backup.sh
-./deploy/verify-backup.sh deploy/backups/comidas-AAAAMMDD-HHMMSS.dump
-```
+## Verificación funcional
 
-La verificación restaura el archivo en una base temporal con un nombre generado, consulta las tablas principales y elimina esa base al terminar. No modifica la base activa.
+- [ ] Login con usuario demo funciona (demo@comidas.app / comidas123)
+- [ ] Sesión persiste al recargar
+- [ ] Recetas cargan correctamente (35 de seed)
+- [ ] Plan semanal visible
+- [ ] Registro público rechaza (403)
+- [ ] Páginas legales (Privacy, Terms) cargan
 
-## Pruebas automatizadas E2E
+## Neon (PostgreSQL)
 
-```bash
-cd tests/e2e
-pnpm install
-pnpm exec playwright install chromium
-pnpm test
-```
+- [ ] Backup automático de Neon habilitado
+- [ ] Región correcta (Frankfurt)
+- [ ] Plan Free sin límites alcanzados
+- [ ] Migraciones aplicadas: `pnpm db:migrate:deploy`
+- [ ] Seed ejecutado: `pnpm db:seed`
 
-Las pruebas públicas no necesitan credenciales. Para cubrir cliente y backoffice autenticados:
+## Monitoreo post-despliegue
 
-```bash
-E2E_EMAIL=cliente@example.com \
-E2E_PASSWORD='contraseña-de-prueba' \
-E2E_ADMIN_ACTOR=admin \
-E2E_ADMIN_SECRET='secreto-de-prueba' \
-E2E_BACKOFFICE_URL=http://localhost:8080 \
-pnpm test
-```
-
-Usa cuentas y datos de prueba, nunca credenciales reales en CI.
+- [ ] Vercel Analytics activo
+- [ ] Neon metrics monitoreados
+- [ ] Health checks configurados (opcional)
+- [ ] Notificaciones de errores activas
