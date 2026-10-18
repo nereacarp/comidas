@@ -27,7 +27,6 @@ interface WeeklyCalendarDesktopProps {
   onDayClipboard: (date: string) => void;
   getDayClipboardLabel: (date: string) => string | null;
   getDayClipboardAction: (date: string) => DayClipboardAction | null;
-  dayHasMeals: (date: string) => boolean;
   canEdit: boolean;
   showCalories: boolean;
 }
@@ -50,7 +49,6 @@ export function WeeklyCalendarDesktop({
   onDayClipboard,
   getDayClipboardLabel,
   getDayClipboardAction,
-  dayHasMeals,
   canEdit,
   showCalories,
 }: Readonly<WeeklyCalendarDesktopProps>) {
@@ -74,7 +72,6 @@ export function WeeklyCalendarDesktop({
             onDayClipboard={() => onDayClipboard(date)}
             dayClipboardBusy={busyDate === date}
             isClipboardSource={copiedDate === date}
-            hasMeals={dayHasMeals(date)}
             canEdit={canEdit}
             showCalories={showCalories}
             totalKcal={getDayKcal(date)}

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { useColorPickerPlacement } from '../../hooks/use-color-picker-placement';
+import { useColorPickerPlacement } from '../../hooks/useColorPickerPlacement';
 import { COLOR_PICKER_PRESETS } from '../../lib/color-picker-presets';
 import { routes } from '../../lib/routes';
 import { getSectionBtnClass } from '../../lib/section-accents';

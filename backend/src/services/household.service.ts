@@ -1,6 +1,6 @@
 import type { PrismaClientType } from '../lib/prisma.js';
 import { pickRandomHouseholdAccentKey, planHouseholdAccentUpdates } from '../lib/list-accent.js';
-import type { CreateHouseholdInput, UpdateMemberRoleInput } from '../types/index.js';
+import type { CreateHouseholdInput, TransferOwnershipInput, UpdateMemberRoleInput } from '../types/index.js';
 
 export function createHouseholdService(prisma: PrismaClientType) {
   return {
@@ -103,6 +103,52 @@ export function createHouseholdService(prisma: PrismaClientType) {
       });
     },
 
+    async transferOwnership(
+      householdId: string,
+      currentOwnerUserId: string,
+      input: TransferOwnershipInput,
+    ) {
+      if (currentOwnerUserId === input.newOwnerUserId) {
+        throw new Error('Selecciona a otro miembro como nuevo propietario');
+      }
+
+      return prisma.$transaction(async (tx) => {
+        const [currentOwner, nextOwner] = await Promise.all([
+          tx.householdMember.findUnique({
+            where: { userId_householdId: { userId: currentOwnerUserId, householdId } },
+          }),
+          tx.householdMember.findUnique({
+            where: { userId_householdId: { userId: input.newOwnerUserId, householdId } },
+          }),
+        ]);
+
+        if (currentOwner?.role !== 'OWNER') {
+          throw new Error('Solo el propietario actual puede transferir el hogar');
+        }
+        if (!nextOwner) {
+          throw new Error('El nuevo propietario debe ser miembro del hogar');
+        }
+
+        await tx.householdMember.update({
+          where: { id: currentOwner.id },
+          data: { role: 'EDITOR' },
+        });
+        await tx.householdMember.update({
+          where: { id: nextOwner.id },
+          data: { role: 'OWNER' },
+        });
+
+        return tx.household.findUniqueOrThrow({
+          where: { id: householdId },
+          include: {
+            members: {
+              include: { user: { select: { id: true, email: true, name: true } } },
+            },
+          },
+        });
+      }, { isolationLevel: 'Serializable' });
+    },
+
     async leaveHousehold(householdId: string, userId: string) {
       const member = await prisma.householdMember.findUnique({
         where: { userId_householdId: { userId, householdId } },
@@ -155,4 +201,3 @@ export function createHouseholdService(prisma: PrismaClientType) {
     },
   };
 }
-

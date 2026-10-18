@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import type { Sex, ActivityLevel } from '../utils/health';
-import type { CalorieGoals, DietPlanKey } from '../utils/health-plans';
-import type { PlanProjection } from '../utils/weight-goal-plans';
+import type { Sex, ActivityLevel } from '../lib/health';
+import type { CalorieGoals, DietPlanKey } from '../lib/health-plans';
+import type { PlanProjection } from '../lib/weight-goal-plans';
 import { todayIsoLocal } from '../lib/meal-plan-dates';
 
 export type DietPlan = keyof CalorieGoals;
@@ -65,6 +65,7 @@ function normalizeWeightGoal(raw: Partial<WeightGoal> | undefined): WeightGoal {
 }
 
 interface HealthState {
+  activeUserId: string | null;
   profile: HealthProfile;
   selectedPlan: DietPlan | null;
   weightGoal: WeightGoal;
@@ -72,6 +73,9 @@ interface HealthState {
   exerciseDays: Record<string, boolean>;
   waterIntakeMl: number;
   waterResetDate: string;
+  /** Raciones personales consumidas por comida; por defecto, una. */
+  mealServings: Record<string, number>;
+  setActiveUser: (userId: string | null) => void;
   setProfile: (updates: Partial<HealthProfile>) => void;
   setSelectedPlan: (plan: DietPlan | null) => void;
   setWeightGoal: (updates: Partial<WeightGoal>) => void;
@@ -86,15 +90,34 @@ interface HealthState {
   addWater: (ml: number) => void;
   removeWater: (ml: number) => void;
   checkDailyReset: () => void;
+  setMealServings: (mealPlanItemId: string, servings: number) => void;
 }
 
-const STORAGE_KEY = 'health_store';
+const STORAGE_KEY_PREFIX = 'health_store:';
 const HISTORY_DAYS = 90;
 
 type Persisted = Pick<
   HealthState,
-  'profile' | 'selectedPlan' | 'weightGoal' | 'exerciseDays' | 'waterIntakeMl' | 'waterResetDate'
+  | 'profile'
+  | 'selectedPlan'
+  | 'weightGoal'
+  | 'exerciseDays'
+  | 'waterIntakeMl'
+  | 'waterResetDate'
+  | 'mealServings'
 >;
+
+function defaultPersisted(): Persisted {
+  return {
+    profile: { weight: null, height: null, age: null, sex: null, activityLevel: 'moderate' },
+    selectedPlan: null,
+    weightGoal: defaultWeightGoal(),
+    exerciseDays: {},
+    waterIntakeMl: 0,
+    waterResetDate: todayIsoLocal(),
+    mealServings: {},
+  };
+}
 
 function trimOldDays(days: Record<string, boolean>): Record<string, boolean> {
   const cutoff = new Date();
@@ -106,38 +129,35 @@ function trimOldDays(days: Record<string, boolean>): Record<string, boolean> {
   return Object.fromEntries(Object.entries(days).filter(([day]) => day >= cutoffStr));
 }
 
-function loadFromStorage(): Persisted {
+function loadFromStorage(userId: string): Persisted {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${userId}`);
     if (!raw) throw new Error();
     const p = JSON.parse(raw);
     return {
       ...p,
       exerciseDays: p.exerciseDays ?? {},
       weightGoal: normalizeWeightGoal(p.weightGoal),
+      mealServings: p.mealServings ?? {},
     };
   } catch {
-    return {
-      profile: { weight: null, height: null, age: null, sex: null, activityLevel: 'moderate' },
-      selectedPlan: null,
-      weightGoal: defaultWeightGoal(),
-      exerciseDays: {},
-      waterIntakeMl: 0,
-      waterResetDate: todayIsoLocal(),
-    };
+    return defaultPersisted();
   }
 }
 
-function persist(state: Persisted) {
+function persist(userId: string | null, state: Persisted) {
+  if (!userId) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    localStorage.setItem(`${STORAGE_KEY_PREFIX}${userId}`, JSON.stringify({
       ...state,
       exerciseDays: trimOldDays(state.exerciseDays),
     }));
-  } catch {}
+  } catch {
+    return;
+  }
 }
 
-const saved = loadFromStorage();
+const saved = defaultPersisted();
 const today = todayIsoLocal();
 
 export const useHealthStore = create<HealthState>((set, get) => {
@@ -150,10 +170,12 @@ export const useHealthStore = create<HealthState>((set, get) => {
       exerciseDays: s.exerciseDays,
       waterIntakeMl: s.waterIntakeMl,
       waterResetDate: s.waterResetDate,
+      mealServings: s.mealServings,
     };
   };
 
   return {
+    activeUserId: null,
     profile: saved.profile,
     selectedPlan: saved.selectedPlan ?? null,
     weightGoal: saved.weightGoal ?? defaultWeightGoal(),
@@ -161,22 +183,36 @@ export const useHealthStore = create<HealthState>((set, get) => {
     exerciseDays: saved.exerciseDays,
     waterIntakeMl: saved.waterResetDate === today ? saved.waterIntakeMl : 0,
     waterResetDate: today,
+    mealServings: saved.mealServings,
+
+    setActiveUser: (userId) => {
+      if (get().activeUserId === userId) return;
+      const next = userId ? loadFromStorage(userId) : defaultPersisted();
+      const localToday = todayIsoLocal();
+      set({
+        activeUserId: userId,
+        ...next,
+        liveCaloriePreview: null,
+        waterIntakeMl: next.waterResetDate === localToday ? next.waterIntakeMl : 0,
+        waterResetDate: localToday,
+      });
+    },
 
     setProfile: (updates) => {
       const next = { ...get().profile, ...updates };
       set({ profile: next });
-      persist({ ...snap(), profile: next });
+      persist(get().activeUserId, { ...snap(), profile: next });
     },
 
     setSelectedPlan: (plan) => {
       set({ selectedPlan: plan });
-      persist({ ...snap(), selectedPlan: plan });
+      persist(get().activeUserId, { ...snap(), selectedPlan: plan });
     },
 
     setWeightGoal: (updates) => {
       const next = { ...get().weightGoal, ...updates };
       set({ weightGoal: next });
-      persist({ ...snap(), weightGoal: next });
+      persist(get().activeUserId, { ...snap(), weightGoal: next });
     },
 
     applyWeightGoal: (updates) => {
@@ -188,7 +224,7 @@ export const useHealthStore = create<HealthState>((set, get) => {
         dailyKcalTarget: updates.dailyKcalTarget,
       };
       set({ weightGoal: next, selectedPlan: updates.linkedPlan ?? null });
-      persist({ ...snap(), weightGoal: next, selectedPlan: updates.linkedPlan ?? null });
+      persist(get().activeUserId, { ...snap(), weightGoal: next, selectedPlan: updates.linkedPlan ?? null });
     },
 
     setLiveCaloriePreview: (preview) => {
@@ -198,41 +234,48 @@ export const useHealthStore = create<HealthState>((set, get) => {
     clearWeightGoal: () => {
       const next = defaultWeightGoal();
       set({ weightGoal: next, liveCaloriePreview: null });
-      persist({ ...snap(), weightGoal: next });
+      persist(get().activeUserId, { ...snap(), weightGoal: next });
     },
 
     resetWeightGoal: () => {
       const next = defaultWeightGoal();
       set({ weightGoal: next, selectedPlan: null, liveCaloriePreview: null });
-      persist({ ...snap(), weightGoal: next, selectedPlan: null });
+      persist(get().activeUserId, { ...snap(), weightGoal: next, selectedPlan: null });
     },
 
     toggleExerciseDay: (date) => {
       const next = { ...get().exerciseDays, [date]: !get().exerciseDays[date] };
       set({ exerciseDays: next });
-      persist({ ...snap(), exerciseDays: next });
+      persist(get().activeUserId, { ...snap(), exerciseDays: next });
     },
 
     addWater: (ml) => {
       get().checkDailyReset();
       const next = get().waterIntakeMl + ml;
       set({ waterIntakeMl: next });
-      persist({ ...snap(), waterIntakeMl: next });
+      persist(get().activeUserId, { ...snap(), waterIntakeMl: next });
     },
 
     removeWater: (ml) => {
       get().checkDailyReset();
       const next = Math.max(0, get().waterIntakeMl - ml);
       set({ waterIntakeMl: next });
-      persist({ ...snap(), waterIntakeMl: next });
+      persist(get().activeUserId, { ...snap(), waterIntakeMl: next });
     },
 
     checkDailyReset: () => {
       const now = todayIsoLocal();
       if (get().waterResetDate !== now) {
         set({ waterIntakeMl: 0, waterResetDate: now });
-        persist({ ...snap(), waterIntakeMl: 0, waterResetDate: now });
+        persist(get().activeUserId, { ...snap(), waterIntakeMl: 0, waterResetDate: now });
       }
+    },
+
+    setMealServings: (mealPlanItemId, servings) => {
+      const normalized = Math.min(10, Math.max(0.25, Math.round(servings * 4) / 4));
+      const next = { ...get().mealServings, [mealPlanItemId]: normalized };
+      set({ mealServings: next });
+      persist(get().activeUserId, { ...snap(), mealServings: next });
     },
   };
 });

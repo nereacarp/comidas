@@ -21,3 +21,7 @@ export interface AddMemberInput {
 export interface UpdateMemberRoleInput {
   role: 'EDITOR' | 'VIEWER';
 }
+
+export interface TransferOwnershipInput {
+  newOwnerUserId: string;
+}

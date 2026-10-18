@@ -155,7 +155,7 @@ export function RecipeDetailPage() {
             <div className="grid grid-cols-2 gap-3">
               {showCalories && recipe.kcal != null && (
                 <div className="metric-tile metric-tile--peach">
-                  <p className="type-metric-label">Calorías</p>
+                  <p className="type-metric-label">Calorías por ración</p>
                   <p className="type-metric-value mt-1">
                     {recipe.kcal} <span className="text-sm font-medium text-muted">kcal</span>
                   </p>

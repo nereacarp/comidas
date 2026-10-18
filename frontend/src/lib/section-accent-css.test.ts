@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accentPastelTint, accentReadableLabel } from '../utils/color-styles';
+import { accentPastelTint, accentReadableLabel } from './color-styles';
 import { sectionAccentCssVarsFromHex } from './section-accent-css';
 
 describe('sectionAccentCssVarsFromHex', () => {

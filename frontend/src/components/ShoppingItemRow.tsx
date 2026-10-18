@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { CheckIcon } from './ui/Icons';
-import { formatQty, type GroupedItem } from '../utils/shopping';
-import { computePantrySurplus } from '../utils/pantry-surplus';
+import { formatQty, type GroupedItem } from '../lib/shopping';
+import { computePantrySurplus } from '../lib/pantry-surplus';
 import type { PantryAdditionResult } from '../types';
 import type { StorageLocation, PantryItem } from '../types';
 import { renderStorageLocationIcon } from '../lib/storage-location-icons';
 import { routes } from '../lib/routes';
 import { getSectionBtnClass } from '../lib/section-accents';
-import { accentChipStyle, resolveLocationColor } from '../utils/color-styles';
+import { accentChipStyle, resolveLocationColor } from '../lib/color-styles';
 
 const SHOPPING_BTN = getSectionBtnClass(routes.shoppingLists);
 

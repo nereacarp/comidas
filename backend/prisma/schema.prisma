@@ -13,11 +13,22 @@ model User {
   passwordHash       String
   name               String
   showCalories       Boolean                @default(true)
+  sessionVersion     Int                    @default(0)
+  emailVerifiedAt    DateTime?
+  status             UserStatus             @default(ACTIVE)
+  suspendedAt        DateTime?
   createdAt          DateTime               @default(now())
   updatedAt          DateTime               @updatedAt
   households         HouseholdMember[]
   favorites          UserFavorite[]
   sentInvitations    HouseholdInvitation[]  @relation("InvitationSender")
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
 }
 
 model Household {
@@ -34,6 +45,7 @@ model Household {
   shoppingLists ShoppingList[]
   pantryItems      PantryItem[]
   storageLocations StorageLocation[]
+  userInvitations  UserInvitation[]
 }
 
 enum HouseholdRole {
@@ -235,4 +247,57 @@ model ShoppingListItem {
   shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
 
   @@index([shoppingListId])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  method     String
+  path       String
+  ip         String
+  statusCode Int
+  actor      String   @default("admin")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model UserInvitation {
+  id             String        @id @default(cuid())
+  email          String
+  name           String?
+  tokenHash      String        @unique
+  invitedByActor String
+  householdId    String?
+  role           HouseholdRole @default(VIEWER)
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime      @default(now())
+  household      Household?    @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  @@index([email, usedAt])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }

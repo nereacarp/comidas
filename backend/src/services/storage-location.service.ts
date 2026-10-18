@@ -13,7 +13,7 @@ interface CreateLocationInput {
   color?: string;
 }
 
-export interface PantryLayoutPlacement {
+interface PantryLayoutPlacement {
   id: string;
   column: number;
   row: number;

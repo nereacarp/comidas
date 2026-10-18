@@ -2,10 +2,6 @@ type DayKcalStatus = 'empty' | 'no-target' | 'on-track' | 'over' | 'under';
 
 const KCAL_TOLERANCE = 100;
 
-function getKcalTargetRange(target: number) {
-  return { min: target - KCAL_TOLERANCE, max: target + KCAL_TOLERANCE, target };
-}
-
 export function getDayKcalStatus(totalKcal: number, calorieTarget: number | null): DayKcalStatus {
   if (totalKcal <= 0) return 'empty';
   if (calorieTarget === null) return 'no-target';
@@ -26,11 +22,6 @@ export function kcalStatusLabel(status: DayKcalStatus): string | null {
     default:
       return null;
   }
-}
-
-export function formatKcalRange(target: number): string {
-  const { min, max } = getKcalTargetRange(target);
-  return `${min.toLocaleString('es-ES')} – ${max.toLocaleString('es-ES')} kcal`;
 }
 
 export function kcalStatusTone(status: DayKcalStatus): {

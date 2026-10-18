@@ -85,7 +85,9 @@ export function HouseholdSwitcherSection() {
         })}
       </ul>
       <form onSubmit={handleCreate} className="settings-create-row">
+        <label htmlFor="new-household-name" className="sr-only">Nombre del nuevo hogar</label>
         <input
+          id="new-household-name"
           type="text"
           placeholder="Nombre del nuevo hogar"
           value={newName}

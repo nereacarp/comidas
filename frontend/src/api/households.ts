@@ -24,8 +24,10 @@ export function createHouseholdsApi(client: ApiClient) {
     updateMemberRole: (householdId: string, userId: string, role: 'EDITOR' | 'VIEWER') =>
       client.patch(`/households/${householdId}/members/${userId}`, { role }),
 
+    transferOwnership: (householdId: string, newOwnerUserId: string) =>
+      client.post<Household>(`/households/${householdId}/transfer-ownership`, { newOwnerUserId }),
+
     leaveHousehold: (householdId: string) =>
       client.post<void>(`/households/${householdId}/leave`),
   };
 }
-

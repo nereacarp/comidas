@@ -76,6 +76,25 @@ describe('MealPlanService', () => {
     });
   });
 
+  describe('updateItem', () => {
+    it('rejects a recipe from another household', async () => {
+      mockPrisma.mealPlanItem.findFirst.mockResolvedValue({ id: 'mp1', householdId: 'h1' });
+      mockPrisma.recipe.findFirst.mockResolvedValue(null);
+
+      await expect(service.updateItem('mp1', 'h1', { recipeId: 'foreign-recipe' }))
+        .rejects.toMatchObject({ statusCode: 400 });
+      expect(mockPrisma.mealPlanItem.update).not.toHaveBeenCalled();
+    });
+
+    it('accepts a recipe belonging to the same household', async () => {
+      mockPrisma.mealPlanItem.findFirst.mockResolvedValue({ id: 'mp1', householdId: 'h1' });
+      mockPrisma.recipe.findFirst.mockResolvedValue({ id: 'r1' });
+      mockPrisma.mealPlanItem.update.mockResolvedValue({ id: 'mp1', recipeId: 'r1' });
+
+      await expect(service.updateItem('mp1', 'h1', { recipeId: 'r1' })).resolves.toMatchObject({ recipeId: 'r1' });
+    });
+  });
+
   describe('copyDay', () => {
     it('should replace target day then copy items from source', async () => {
       mockPrisma.mealPlanItem.findMany.mockResolvedValue([

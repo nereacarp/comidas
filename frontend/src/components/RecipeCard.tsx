@@ -63,7 +63,9 @@ export function RecipeCard({ recipe }: Readonly<RecipeCardProps>) {
           {recipe.categories?.slice(0, 2).map((cat) => (
             <MealTypeBadge key={cat.id} mealType={cat.mealType} />
           ))}
-          {showCalories && recipe.kcal != null && <RecipeMetaChip>{recipe.kcal} kcal</RecipeMetaChip>}
+          {showCalories && recipe.kcal != null && (
+            <RecipeMetaChip>{recipe.kcal} kcal/ración</RecipeMetaChip>
+          )}
           {totalMinutes != null && totalMinutes > 0 && (
             <RecipeMetaChip>{totalMinutes} min</RecipeMetaChip>
           )}

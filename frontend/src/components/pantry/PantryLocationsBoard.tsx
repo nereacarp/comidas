@@ -3,8 +3,8 @@ import { createStorageLocationsApi } from '../../api/storage-locations';
 import { apiClient } from '../../api/client';
 import { usePantryVisibleColumns } from '../../hooks/usePantryVisibleColumns';
 import type { PantryItem, StorageLocation } from '../../types';
-import { resolveLocationColor } from '../../utils/color-styles';
-import { pantryGroupsItemsKey, type PantryLocationGroupData } from '../../utils/pantry-groups';
+import { resolveLocationColor } from '../../lib/color-styles';
+import { pantryGroupsItemsKey, type PantryLocationGroupData } from '../../lib/pantry-groups';
 import {
   PANTRY_LAYOUT_COLUMNS,
   columnsToPlacements,
@@ -16,7 +16,7 @@ import {
   placementSignature,
   type LocatedPantryGroup,
   type PantryDropPosition,
-} from '../../utils/pantry-layout';
+} from '../../lib/pantry-layout';
 import { PantryLocationGroup } from './PantryLocationGroup';
 
 const locationsApi = createStorageLocationsApi(apiClient);

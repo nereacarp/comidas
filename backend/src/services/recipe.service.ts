@@ -258,36 +258,38 @@ export function createRecipeService(prisma: PrismaClientType) {
         }
       }
 
-      await prisma.recipeIngredient.deleteMany({ where: { recipeId } });
-      await prisma.recipeCategory.deleteMany({ where: { recipeId } });
-      await prisma.recipeTag.deleteMany({ where: { recipeId } });
+      return prisma.$transaction(async (tx) => {
+        await tx.recipeIngredient.deleteMany({ where: { recipeId } });
+        await tx.recipeCategory.deleteMany({ where: { recipeId } });
+        await tx.recipeTag.deleteMany({ where: { recipeId } });
 
-      return prisma.recipe.update({
-        where: { id: recipeId },
-        data: {
-          title: input.title,
-          description: input.description,
-          instructions: input.instructions,
-          prepTime: input.prepTime,
-          cookTime: input.cookTime,
-          servings: input.servings,
-          imageUrl: input.imageUrl,
-          kcal: input.kcal,
-          ingredients: input.ingredients
-            ? { create: input.ingredients.map((ing, i) => ({ ...ing, order: ing.order ?? i })) }
-            : undefined,
-          categories: input.categories
-            ? { create: input.categories.map((mealType) => ({ mealType })) }
-            : undefined,
-          tags: input.tagIds
-            ? { create: input.tagIds.map((tagId) => ({ tagId })) }
-            : undefined,
-        },
-        include: {
-          ingredients: { orderBy: { order: 'asc' } },
-          categories: true,
-          tags: { include: { tag: true } },
-        },
+        return tx.recipe.update({
+          where: { id: recipeId },
+          data: {
+            title: input.title,
+            description: input.description,
+            instructions: input.instructions,
+            prepTime: input.prepTime,
+            cookTime: input.cookTime,
+            servings: input.servings,
+            imageUrl: input.imageUrl,
+            kcal: input.kcal,
+            ingredients: input.ingredients
+              ? { create: input.ingredients.map((ing, i) => ({ ...ing, order: ing.order ?? i })) }
+              : undefined,
+            categories: input.categories
+              ? { create: input.categories.map((mealType) => ({ mealType })) }
+              : undefined,
+            tags: input.tagIds
+              ? { create: input.tagIds.map((tagId) => ({ tagId })) }
+              : undefined,
+          },
+          include: {
+            ingredients: { orderBy: { order: 'asc' } },
+            categories: true,
+            tags: { include: { tag: true } },
+          },
+        });
       });
     },
 

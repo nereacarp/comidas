@@ -4,6 +4,8 @@ export interface User {
   name: string;
   showCalories: boolean;
   createdAt: string;
+  emailVerifiedAt?: string | null;
+  status?: 'ACTIVE' | 'SUSPENDED';
 }
 
 export interface Household {
@@ -42,7 +44,19 @@ export interface HouseholdInvitation {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+}
+
+export interface RegistrationPendingResponse {
+  requiresEmailVerification: true;
+}
+
+export interface UserInvitationInfo {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: 'EDITOR' | 'VIEWER';
+  expiresAt: string;
+  household?: { id: string; name: string } | null;
 }
 
 export interface UserProfile extends User {

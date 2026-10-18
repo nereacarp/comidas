@@ -17,8 +17,9 @@ export function createAuthService(prisma: PrismaClientType) {
           email: input.email,
           passwordHash,
           name: input.name,
+          emailVerifiedAt: process.env.REQUIRE_EMAIL_VERIFICATION === 'true' ? null : new Date(),
         },
-        select: { id: true, email: true, name: true, showCalories: true, createdAt: true },
+        select: { id: true, email: true, name: true, showCalories: true, sessionVersion: true, emailVerifiedAt: true, status: true, createdAt: true },
       });
       return user;
     },
@@ -30,11 +31,25 @@ export function createAuthService(prisma: PrismaClientType) {
       if (!user) {
         throw new Error('Credenciales incorrectas');
       }
+      if (user.status === 'SUSPENDED') {
+        throw new Error('Cuenta suspendida');
+      }
+      if (process.env.REQUIRE_EMAIL_VERIFICATION === 'true' && !user.emailVerifiedAt) {
+        throw new Error('Email no verificado');
+      }
       const valid = await bcrypt.compare(input.password, user.passwordHash);
       if (!valid) {
         throw new Error('Credenciales incorrectas');
       }
-      return { id: user.id, email: user.email, name: user.name, showCalories: user.showCalories };
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        showCalories: user.showCalories,
+        sessionVersion: user.sessionVersion,
+        emailVerifiedAt: user.emailVerifiedAt,
+        status: user.status,
+      };
     },
 
     async getProfile(userId: string) {
@@ -45,6 +60,8 @@ export function createAuthService(prisma: PrismaClientType) {
           email: true,
           name: true,
           showCalories: true,
+          emailVerifiedAt: true,
+          status: true,
           createdAt: true,
           households: {
             include: { household: true },
@@ -61,7 +78,20 @@ export function createAuthService(prisma: PrismaClientType) {
       return prisma.user.update({
         where: { id: userId },
         data: { showCalories },
-        select: { id: true, email: true, name: true, showCalories: true, createdAt: true },
+      select: { id: true, email: true, name: true, showCalories: true, emailVerifiedAt: true, status: true, createdAt: true },
+      });
+    },
+
+    async changePassword(userId: string, currentPassword: string, newPassword: string) {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) throw new Error('Usuario no encontrado');
+      const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!valid) throw new Error('Contraseña actual incorrecta');
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+      return prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash, sessionVersion: { increment: 1 } },
+        select: { email: true, sessionVersion: true },
       });
     },
 
@@ -108,6 +138,32 @@ export function createAuthService(prisma: PrismaClientType) {
         prisma.user.delete({ where: { id: userId } }),
       ]);
     },
+
+    async exportUserData(userId: string) {
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: {
+          id: true, email: true, name: true, showCalories: true, emailVerifiedAt: true, createdAt: true,
+          households: {
+            select: {
+              role: true,
+              household: {
+                include: {
+                  members: { select: { role: true, user: { select: { id: true, name: true, email: true } } } },
+                  recipes: { include: { ingredients: true, categories: true, tags: { include: { tag: true } } } },
+                  mealPlanItems: true,
+                  shoppingLists: { include: { items: true } },
+                  pantryItems: true,
+                  storageLocations: true,
+                  tags: true,
+                },
+              },
+            },
+          },
+          favorites: { select: { recipeId: true, createdAt: true } },
+        },
+      });
+      return { exportedAt: new Date().toISOString(), user };
+    },
   };
 }
-

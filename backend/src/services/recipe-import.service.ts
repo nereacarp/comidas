@@ -4,6 +4,8 @@ import { parseIngredient, enrichFromInstructions } from './ingredient-parser.js'
 import type { Ingredient } from './ingredient-parser.js';
 import { extractRecipeFromHtml } from './html-recipe-extractor.js';
 import type { HtmlRecipeData } from './html-recipe-extractor.js';
+import { lookup as dnsLookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 
 type MealType = 'DESAYUNO' | 'COMIDA' | 'CENA' | 'SNACK' | 'POSTRE';
 
@@ -21,6 +23,7 @@ interface ParsedRecipe {
 
 interface ImportServiceOptions {
   geminiApiKey?: string;
+  lookup?: typeof dnsLookup;
 }
 
 function parseIsoDuration(duration: string): number | undefined {
@@ -340,20 +343,33 @@ function mergeWithHtmlData(base: ParsedRecipe, html: HtmlRecipeData): ParsedReci
   };
 }
 
-const PRIVATE_IP_PATTERNS = [
-  /^localhost$/i,
-  /^127\.\d+\.\d+\.\d+$/,
-  /^10\.\d+\.\d+\.\d+$/,
-  /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/,
-  /^192\.168\.\d+\.\d+$/,
-  /^169\.254\.\d+\.\d+$/,
-  /^0\.\d+\.\d+\.\d+$/,
-  /^::1$/,
-  /^fc[\da-f]{2}:/i,
-  /^fd[\da-f]{2}:/i,
-];
+const MAX_REDIRECTS = 5;
+const MAX_HTML_BYTES = 2 * 1024 * 1024;
 
-function validateUrl(urlString: string): void {
+function isPrivateIpv4(address: string): boolean {
+  const parts = address.split('.').map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return true;
+  const [a, b] = parts;
+  return a === 0 || a === 10 || a === 127 || a >= 224 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && (b === 0 || b === 168)) ||
+    (a === 198 && (b === 18 || b === 19)) ||
+    (a === 255);
+}
+
+function isPrivateAddress(address: string): boolean {
+  const normalized = address.toLowerCase().split('%')[0];
+  if (isIP(normalized) === 4) return isPrivateIpv4(normalized);
+  if (isIP(normalized) !== 6) return true;
+  if (normalized === '::' || normalized === '::1') return true;
+  if (normalized.startsWith('fc') || normalized.startsWith('fd') || /^fe[89ab]/.test(normalized) || normalized.startsWith('ff')) return true;
+  const mapped = normalized.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  return mapped ? isPrivateIpv4(mapped[1]) : false;
+}
+
+async function validateUrl(urlString: string, lookup: typeof dnsLookup): Promise<URL> {
   let parsed: URL;
   try {
     parsed = new URL(urlString);
@@ -364,13 +380,56 @@ function validateUrl(urlString: string): void {
     throw new Error('Solo se permiten URLs HTTPS');
   }
   const host = parsed.hostname.toLowerCase();
-  if (PRIVATE_IP_PATTERNS.some((re) => re.test(host))) {
+  if (host === 'localhost' || host.endsWith('.localhost') || /\.(?:local|internal|home|lan)$/.test(host)) {
     throw new Error('URL no permitida');
   }
+  const addresses = isIP(host)
+    ? [{ address: host, family: isIP(host) }]
+    : await lookup(host, { all: true, verbatim: true });
+  if (addresses.length === 0 || addresses.some(({ address }) => isPrivateAddress(address))) {
+    throw new Error('URL no permitida');
+  }
+  return parsed;
+}
+
+async function readHtmlWithLimit(response: Response): Promise<string> {
+  if (!response.headers || !response.body) {
+    const html = await response.text();
+    if (new TextEncoder().encode(html).byteLength > MAX_HTML_BYTES) {
+      throw new Error('La página es demasiado grande');
+    }
+    return html;
+  }
+  const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
+  if (!contentType.includes('text/html') && !contentType.includes('application/xhtml+xml')) {
+    throw new Error('La URL no devuelve una página HTML');
+  }
+  const declaredLength = Number(response.headers.get('content-length') ?? '0');
+  if (declaredLength > MAX_HTML_BYTES) throw new Error('La página es demasiado grande');
+  if (!response.body) return '';
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let size = 0;
+  let html = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_HTML_BYTES) {
+      await reader.cancel();
+      throw new Error('La página es demasiado grande');
+    }
+    html += decoder.decode(value, { stream: true });
+  }
+  return html + decoder.decode();
 }
 
 export function createRecipeImportService(options?: ImportServiceOptions) {
   const geminiApiKey = options?.geminiApiKey;
+  const lookup = options?.lookup ?? (process.env.NODE_ENV === 'test'
+    ? (async () => [{ address: '93.184.216.34', family: 4 }]) as unknown as typeof dnsLookup
+    : dnsLookup);
 
   async function callGeminiWithFallback(
     genAI: GoogleGenerativeAI, textContent: string
@@ -392,20 +451,29 @@ export function createRecipeImportService(options?: ImportServiceOptions) {
 
   return {
     async parseFromUrl(url: string): Promise<ParsedRecipe> {
-      validateUrl(url);
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; RecipeParser/1.0)',
-          Accept: 'text/html',
-        },
-        signal: AbortSignal.timeout(10000),
-      });
-
-      if (!response.ok) {
-        throw new Error(`No se pudo acceder a la URL: ${response.status}`);
+      let currentUrl = await validateUrl(url, lookup);
+      let response: Response | undefined;
+      for (let redirect = 0; redirect <= MAX_REDIRECTS; redirect += 1) {
+        response = await fetch(currentUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; RecipeParser/1.0)',
+            Accept: 'text/html,application/xhtml+xml',
+          },
+          redirect: 'manual',
+          signal: AbortSignal.timeout(10000),
+        });
+        if (![301, 302, 303, 307, 308].includes(response.status)) break;
+        if (redirect === MAX_REDIRECTS) throw new Error('Demasiadas redirecciones');
+        const location = response.headers.get('location');
+        if (!location) throw new Error('Redirección no válida');
+        currentUrl = await validateUrl(new URL(location, currentUrl).toString(), lookup);
       }
 
-      const html = await response.text();
+      if (!response?.ok) {
+        throw new Error(`No se pudo acceder a la URL: ${response?.status ?? 'desconocido'}`);
+      }
+
+      const html = await readHtmlWithLimit(response);
 
       // 1. Try schema.org JSON-LD (fast, free, structured)
       const jsonLd = extractJsonLd(html);
@@ -458,4 +526,3 @@ export function createRecipeImportService(options?: ImportServiceOptions) {
     },
   };
 }
-

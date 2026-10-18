@@ -5,7 +5,7 @@ describe('AuthStore', () => {
   beforeEach(() => {
     useAuthStore.setState({
       user: null,
-      token: null,
+      isAuthenticated: false,
       isLoading: false,
       error: null,
     });
@@ -25,11 +25,11 @@ describe('AuthStore', () => {
   it('should logout', () => {
     useAuthStore.setState({
       user: { id: '1', email: 'a@b.com', name: 'A', showCalories: true, createdAt: '' },
-      token: 'tok',
+      isAuthenticated: true,
     });
     useAuthStore.getState().logout();
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
-    expect(state.token).toBeNull();
+    expect(state.isAuthenticated).toBe(false);
   });
 });

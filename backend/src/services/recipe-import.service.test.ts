@@ -556,5 +556,34 @@ describe('RecipeImportService', () => {
       expect(result.imageUrl).toBe('https://example.com/paella.jpg');
       expect(result.ingredients).toHaveLength(3);
     });
+
+    it('rejects a hostname that resolves to a private address', async () => {
+      const lookup = vi.fn().mockResolvedValue([{ address: '192.168.1.20', family: 4 }]);
+      const fetchMock = vi.spyOn(globalThis, 'fetch');
+      const service = createRecipeImportService({ lookup: lookup as never });
+
+      await expect(service.parseFromUrl('https://recipes.example/test')).rejects.toThrow('URL no permitida');
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('revalidates every redirect and blocks redirects to loopback', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, {
+        status: 302,
+        headers: { location: 'https://127.0.0.1/private' },
+      }));
+      const service = createRecipeImportService();
+
+      await expect(service.parseFromUrl('https://example.com/redirect')).rejects.toThrow('URL no permitida');
+    });
+
+    it('rejects non-HTML responses', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"data":true}', {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }));
+      const service = createRecipeImportService();
+
+      await expect(service.parseFromUrl('https://example.com/api')).rejects.toThrow('no devuelve una página HTML');
+    });
   });
 });

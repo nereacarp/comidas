@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { UtensilsIcon } from '../ui/Icons';
-import { MEAL_TYPE_COLORS, MEAL_TYPE_LABELS, mealTypeBadgeStyle } from '../../utils/meal-type';
+import { MEAL_TYPE_COLORS, MEAL_TYPE_LABELS, mealTypeBadgeStyle } from '../../lib/meal-type';
 import { routes } from '../../lib/routes';
 import type { MealPlanItem, MealType } from '../../types';
 

@@ -23,7 +23,10 @@ export function createFavoriteService(prisma: PrismaClientType) {
 
     async list(userId: string) {
       const favorites = await prisma.userFavorite.findMany({
-        where: { userId },
+        where: {
+          userId,
+          recipe: { household: { members: { some: { userId } } } },
+        },
         include: {
           recipe: {
             include: {
@@ -39,8 +42,12 @@ export function createFavoriteService(prisma: PrismaClientType) {
     },
 
     async isFavorited(userId: string, recipeId: string) {
-      const fav = await prisma.userFavorite.findUnique({
-        where: { userId_recipeId: { userId, recipeId } },
+      const fav = await prisma.userFavorite.findFirst({
+        where: {
+          userId,
+          recipeId,
+          recipe: { household: { members: { some: { userId } } } },
+        },
       });
       return !!fav;
     },

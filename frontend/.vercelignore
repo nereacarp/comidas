@@ -1,0 +1,11 @@
+# Nunca subir secretos ni artefactos locales a Vercel
+.env
+.env.*
+!.env.example
+node_modules
+coverage
+dist
+.vercel
+*.tsbuildinfo
+*.dump
+backups

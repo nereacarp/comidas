@@ -8,12 +8,12 @@ import { useHousehold, useHouseholdId } from '../hooks/useHousehold';
 import { routes } from '../lib/routes';
 import { getListAccent, listAccentCssVars } from '../lib/list-accents';
 import { getNavAccent, getSectionBtnClass } from '../lib/section-accents';
-import { groupShoppingItems } from '../utils/shopping';
+import { groupShoppingItems } from '../lib/shopping';
 import { ShoppingListDetailHeader } from '../components/shopping/ShoppingListDetailHeader';
 import { ShoppingListItemsPanel } from '../components/shopping/ShoppingListItemsPanel';
-import type { GroupedItem } from '../utils/shopping';
+import type { GroupedItem } from '../lib/shopping';
 import type { ShoppingList, StorageLocation, PantryItem, PantryAdditionResult } from '../types';
-import { formatQty } from '../utils/shopping';
+import { formatQty } from '../lib/shopping';
 
 const SHOPPING_ACCENT = getNavAccent(routes.shoppingLists);
 const SHOPPING_BTN = getSectionBtnClass(routes.shoppingLists);

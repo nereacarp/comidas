@@ -6,12 +6,12 @@ import { AuthFormError } from '../components/auth/AuthFormError';
 import { PasswordInput } from '../components/ui/PasswordInput';
 
 export function LoginPage() {
-  const { login, isLoading, error, clearError, token } = useAuthStore();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  if (token) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -68,6 +68,9 @@ export function LoginPage() {
             onChange={setPassword}
             disabled={isLoading}
           />
+          <div className="mt-2 text-right">
+            <Link to="/forgot-password" className="auth-link text-sm">¿Has olvidado la contraseña?</Link>
+          </div>
         </div>
 
         <button

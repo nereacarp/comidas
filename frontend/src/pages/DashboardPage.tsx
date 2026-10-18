@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth.store';
 import { useHealthStore } from '../stores/health.store';
 import { useHousehold, useHouseholdId } from '../hooks/useHousehold';
-import { calculateBMR, calculateCalorieGoals, calculateTDEE, calculateWaterGoal } from '../utils/health';
+import { calculateBMR, calculateCalorieGoals, calculateTDEE, calculateWaterGoal } from '../lib/health';
 import { createRecipesApi } from '../api/recipes';
 import { createMealPlanApi } from '../api/meal-plan';
 import { apiClient } from '../api/client';
@@ -16,6 +16,7 @@ import {
   FlameIcon,
   HealthIcon,
   PantryIcon,
+  SettingsIcon,
   ShoppingCartIcon,
   UsersIcon,
   WaterDropIcon,
@@ -134,15 +135,24 @@ export function DashboardPage() {
     <div className="page-shell">
       <header className="dashboard-page-header w-full min-w-0">
         <div className="dashboard-page-header__row">
-          <div className="dashboard-page-header__intro min-w-0">
-            <h1 className="dashboard-page-header__title">
-              Hola,{' '}
-              <span className="text-[var(--accent-greeting)]">{firstName}</span>
-            </h1>
-            <p className="dashboard-page-header__meta">
-              <span className="text-ink font-medium">{household?.name}</span>
-              <span className="text-muted">{` · ${dateLabel}`}</span>
-            </p>
+          <div className="dashboard-page-header__top">
+            <div className="dashboard-page-header__intro min-w-0">
+              <h1 className="dashboard-page-header__title">
+                Hola,{' '}
+                <span className="text-[var(--accent-greeting)]">{firstName}</span>
+              </h1>
+              <p className="dashboard-page-header__meta">
+                <span className="text-ink font-medium">{household?.name}</span>
+                <span className="text-muted">{` · ${dateLabel}`}</span>
+              </p>
+            </div>
+            <Link
+              to={routes.settings}
+              aria-label="Ajustes"
+              className="dashboard-settings-link md:hidden"
+            >
+              <SettingsIcon aria-hidden="true" />
+            </Link>
           </div>
           <div className="dashboard-page-header__actions">
             <button

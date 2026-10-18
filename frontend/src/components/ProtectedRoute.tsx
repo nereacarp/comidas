@@ -3,19 +3,19 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth.store';
 
 export function ProtectedRoute() {
-  const { token, user, isLoading, loadProfile } = useAuthStore();
+  const { isAuthenticated, user, isLoading, loadProfile } = useAuthStore();
 
   useEffect(() => {
-    if (token && !user) {
+    if (isAuthenticated && !user) {
       loadProfile();
     }
-  }, [token, user, loadProfile]);
+  }, [isAuthenticated, user, loadProfile]);
 
-  if (!token) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (isLoading || (!user && token)) {
+  if (isLoading || (!user && isAuthenticated)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="loading-text text-lg">Cargando...</div>

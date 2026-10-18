@@ -1,8 +1,8 @@
 export const LIST_ACCENT_KEYS = ['lavender', 'mint', 'peach', 'cyan', 'coral'] as const;
 
-export type ListAccentKey = (typeof LIST_ACCENT_KEYS)[number];
+type ListAccentKey = (typeof LIST_ACCENT_KEYS)[number];
 
-export function isListAccentKey(value: string): value is ListAccentKey {
+function isListAccentKey(value: string): value is ListAccentKey {
   return (LIST_ACCENT_KEYS as readonly string[]).includes(value);
 }
 
@@ -31,13 +31,13 @@ export function pickNextListAccentKey(previous?: string | null): ListAccentKey {
   return LIST_ACCENT_KEYS[(idx + 1) % LIST_ACCENT_KEYS.length];
 }
 
-export interface ListAccentRow {
+interface ListAccentRow {
   id: string;
   accentKey: string;
   createdAt: Date;
 }
 
-export interface HouseholdAccentRow {
+interface HouseholdAccentRow {
   id: string;
   accentKey: string;
   createdAt: Date;

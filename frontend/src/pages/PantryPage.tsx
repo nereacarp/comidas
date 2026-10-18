@@ -6,8 +6,9 @@ import { createStorageLocationsApi } from '../api/storage-locations';
 import { apiClient } from '../api/client';
 import { PantryLocationsBoard } from '../components/pantry/PantryLocationsBoard';
 import { PantryLocationHead } from '../components/pantry/PantryLocationHead';
+import { UndoToast } from '../components/ui/UndoToast';
 import { PantryItemGrid } from '../components/pantry/PantryItemGrid';
-import { groupPantryByLocation } from '../utils/pantry-groups';
+import { groupPantryByLocation } from '../lib/pantry-groups';
 import { PantryIcon } from '../components/ui/Icons';
 import { SectionEmptyState } from '../components/ui/SectionEmptyState';
 import { routes } from '../lib/routes';
@@ -23,7 +24,7 @@ import {
 import { settingsPantryLocationsPath } from '../lib/settings-sections';
 import { APP_PALETTE } from '../lib/app-palette';
 import { sectionAccentCssVarsFromHex } from '../lib/section-accent-css';
-import { accentChipStyle, resolveLocationColor } from '../utils/color-styles';
+import { accentChipStyle, resolveLocationColor } from '../lib/color-styles';
 
 /** Sin ubicación: distinto del azul de sección pero no el color de otra ubicación. */
 const UNASSIGNED_LOCATION_HEX = APP_PALETTE.pastelPeachIcon;
@@ -53,6 +54,7 @@ export function PantryPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
+  const [deletedItem, setDeletedItem] = useState<PantryItem | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const nameDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const unassignedSectionRef = useRef<HTMLDivElement>(null);
@@ -182,7 +184,22 @@ export function PantryPage() {
 
   const handleDelete = async (itemId: string) => {
     if (!householdId) return;
+    const item = items.find((candidate) => candidate.id === itemId);
     await pantryApi.delete(householdId, itemId);
+    await reload();
+    if (item) setDeletedItem(item);
+  };
+
+  const handleUndoDelete = async () => {
+    if (!householdId || !deletedItem) return;
+    const item = deletedItem;
+    setDeletedItem(null);
+    await pantryApi.add(householdId, {
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      ...(item.locationId ? { locationId: item.locationId } : {}),
+    });
     await reload();
   };
 
@@ -234,6 +251,14 @@ export function PantryPage() {
           </button>
         ) : undefined}
       />
+
+      {deletedItem && (
+        <UndoToast
+          message={`${deletedItem.name} eliminado de la despensa.`}
+          onUndo={handleUndoDelete}
+          onDismiss={() => setDeletedItem(null)}
+        />
+      )}
 
       {saveNotice && (
         <div

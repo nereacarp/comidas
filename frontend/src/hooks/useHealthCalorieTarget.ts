@@ -5,13 +5,14 @@ import {
   calculateCalorieGoals,
   calculateTDEE,
   EXERCISE_KCAL_BONUS,
-} from '../utils/health';
+  isAdultHealthAge,
+} from '../lib/health';
 
 export function useHealthCalorieTarget() {
   const { profile, selectedPlan, weightGoal, exerciseDays } = useHealthStore();
 
   const profileComplete = Boolean(
-    profile.weight && profile.height && profile.age && profile.sex,
+    profile.weight && profile.height && isAdultHealthAge(profile.age) && profile.sex,
   );
 
   return useMemo(() => {
@@ -26,7 +27,7 @@ export function useHealthCalorieTarget() {
         goalMode: null,
         usesExactTimelineKcal: false,
         isAdapted: false,
-        getCalorieTarget: (_date: string) => null,
+        getCalorieTarget: () => null,
       };
     }
 

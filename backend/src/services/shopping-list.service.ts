@@ -4,14 +4,14 @@ import { accentKeyAtIndex, planDistinctListAccentUpdates } from '../lib/list-acc
 import { computePantrySurplus } from '../lib/pantry-surplus.js';
 import type { createPantryService } from './pantry.service.js';
 
-export interface PantryAdditionResult {
+interface PantryAdditionResult {
   name: string;
   quantity: number;
   unit: string;
   locationId?: string;
 }
 
-export interface CheckGroupedItemsResult {
+interface CheckGroupedItemsResult {
   items: Array<{ id: string; checked: boolean; name: string; quantity: number | null; unit: string | null }>;
   pantryAdded: PantryAdditionResult | null;
 }

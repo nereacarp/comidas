@@ -1,5 +1,5 @@
 /** Payd pastel storage defaults — keep in sync with frontend `pantry-location-colors.ts`. */
-export const PANTRY_PASTEL_HEX = {
+const PANTRY_PASTEL_HEX = {
   mint: '#a8e6cf',
   lavender: '#e6ccff',
   peach: '#ffd8a8',
@@ -16,7 +16,7 @@ export const DEFAULT_HOUSEHOLD_STORAGE_LOCATIONS = [
 ] as const;
 
 /** Cycle for user-created locations (same order as list accents). */
-export const PANTRY_RANDOM_PASTEL_HEX = [
+const PANTRY_RANDOM_PASTEL_HEX = [
   PANTRY_PASTEL_HEX.lavender,
   PANTRY_PASTEL_HEX.mint,
   PANTRY_PASTEL_HEX.peach,
@@ -52,7 +52,7 @@ export function pantryColorForNewLocation(existingCount: number): string {
   return PANTRY_RANDOM_PASTEL_HEX[i]!;
 }
 
-export function defaultStorageLocationColor(icon: string): string {
+function defaultStorageLocationColor(icon: string): string {
   return ICON_DEFAULT_PASTELS[icon] ?? PANTRY_RANDOM_PASTEL_HEX[0]!;
 }
 

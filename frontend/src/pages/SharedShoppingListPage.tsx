@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { groupShoppingItems } from '../utils/shopping';
-import type { GroupedItem } from '../utils/shopping';
+import { groupShoppingItems } from '../lib/shopping';
+import type { GroupedItem } from '../lib/shopping';
 import { ShoppingListDetailHeader } from '../components/shopping/ShoppingListDetailHeader';
 import { ShoppingListItemsPanel } from '../components/shopping/ShoppingListItemsPanel';
 import { getListAccent, listAccentCssVars } from '../lib/list-accents';
 import type { ShoppingList } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL ?? '';
+const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 export function SharedShoppingListPage() {
   const { token } = useParams<{ token: string }>();

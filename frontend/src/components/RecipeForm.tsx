@@ -5,7 +5,7 @@ import { createPantryApi } from '../api/pantry';
 import { createRecipesApi } from '../api/recipes';
 import { apiClient } from '../api/client';
 import { Card } from './ui/Card';
-import { MEAL_TYPES, mealTypeChipStyle } from '../utils/meal-type';
+import { MEAL_TYPES, mealTypeChipStyle } from '../lib/meal-type';
 import type { CreateRecipeInput, MealType, Tag, Recipe } from '../types';
 import { routes } from '../lib/routes';
 import { getSectionBtnClass } from '../lib/section-accents';
@@ -53,7 +53,7 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
   });
   const [prepTime, setPrepTime] = useState(initialData?.prepTime?.toString() || '');
   const [cookTime, setCookTime] = useState(initialData?.cookTime?.toString() || '');
-  const [servings, setServings] = useState(initialData?.servings?.toString() || '');
+  const [servings, setServings] = useState(initialData?.servings?.toString() || '1');
   const [kcal, setKcal] = useState(initialData?.kcal?.toString() || '');
   const [categories, setCategories] = useState<MealType[]>(
     initialData?.categories.map((c) => c.mealType) || []
@@ -171,9 +171,7 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
       setKcal(result.kcal.toString());
       setKcalEstimateHint(
         result.explanation
-          ?? (servings
-            ? `Estimación por ración (${servings} en total). Puedes editarla.`
-            : 'Estimación del plato completo. Puedes editarla.')
+          ?? `Estimación por ración (${servings || '1'} en total). Puedes editarla.`
       );
     } catch (err) {
       setKcalEstimateError(err instanceof Error ? err.message : 'No se pudieron estimar las calorías');
@@ -267,7 +265,7 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
                   <div className="sm:col-span-1">
                     <div className="flex items-center justify-between gap-2">
                       <label htmlFor="kcal" className="type-label block">
-                        Calorías (kcal)
+                        Calorías por ración (kcal)
                       </label>
                       <button
                         type="button"
@@ -299,7 +297,7 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
                     )}
                     {!kcalEstimateHint && !kcalEstimateError && namedIngredients.length > 0 && (
                       <p className="type-caption mt-1">
-                        Estimación opcional según ingredientes. Siempre editable.
+                        Valor por una ración. Estimación opcional según ingredientes y siempre editable.
                       </p>
                     )}
                   </div>
@@ -489,8 +487,8 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
 
             <div className="space-y-2">
               {ingredients.map((ing, i) => (
-                <div key={ing.id} className="flex items-center gap-2 min-w-0">
-                  <div className="relative min-w-0 flex-1">
+                <div key={ing.id} className="recipe-ingredient-row flex items-center gap-2 min-w-0">
+                  <div className="recipe-ingredient-row__name relative min-w-0 flex-1">
                     <label className="sr-only" htmlFor={`ing-name-${ing.id}`}>Ingrediente {i + 1}</label>
                     <input
                       id={`ing-name-${ing.id}`}
@@ -524,14 +522,14 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
                     step="any"
                     value={ing.quantity}
                     onChange={(e) => updateIngredient(i, 'quantity', e.target.value)}
-                    className="input w-[4.5rem] shrink-0 tabular-nums"
+                    className="recipe-ingredient-row__quantity input w-[4.5rem] shrink-0 tabular-nums"
                     aria-label={`Cantidad ingrediente ${i + 1}`}
                   />
                   <input
                     placeholder="Unidad"
                     value={ing.unit}
                     onChange={(e) => updateIngredient(i, 'unit', e.target.value)}
-                    className="input w-[5.5rem] shrink-0"
+                    className="recipe-ingredient-row__unit input w-[5.5rem] shrink-0"
                     aria-label={`Unidad ingrediente ${i + 1}`}
                   />
                   {ingredients.length > 1 && (
@@ -550,7 +548,7 @@ export function RecipeForm(props: Readonly<RecipeFormProps>) {
         </Card>
       </div>
 
-      <div className="sticky bottom-2 z-10">
+      <div className="form-sticky-wrap sticky bottom-2 z-10">
         <div className="flex items-center justify-end gap-2 form-sticky-bar">
           <button
             type="button"

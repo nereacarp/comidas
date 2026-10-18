@@ -1,5 +1,5 @@
 import type { PantryItem, StorageLocation } from '../types';
-import type { PantryLocationGroupData } from '../utils/pantry-groups';
+import type { PantryLocationGroupData } from './pantry-groups';
 
 export interface PantrySearchMatch {
   item: PantryItem;

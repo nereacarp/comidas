@@ -88,7 +88,8 @@ export function getSectionSoftBtnClass(path: string): string {
 }
 
 /** Barra superior de formularios en tarjetas de sección. */
-export function getSectionStripeClass(_path?: string): string {
+export function getSectionStripeClass(path?: string): string {
+  void path;
   return 'section-stripe-accent';
 }
 

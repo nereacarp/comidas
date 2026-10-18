@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-export interface AuthRateLimitConfig {
+interface AuthRateLimitConfig {
   maxFailures: number;
   lockoutMs: number;
   minAttemptIntervalMs: number;
@@ -16,16 +16,16 @@ export const DEFAULT_AUTH_RATE_LIMIT_CONFIG: AuthRateLimitConfig = {
   maxAttemptsPerIpPerWindow: 30,
 };
 
-export type AuthRateLimitDenied = {
+type AuthRateLimitDenied = {
   allowed: false;
   statusCode: 429;
   error: string;
   retryAfterSeconds?: number;
 };
 
-export type AuthRateLimitAllowed = { allowed: true };
+type AuthRateLimitAllowed = { allowed: true };
 
-export type AuthRateLimitResult = AuthRateLimitAllowed | AuthRateLimitDenied;
+type AuthRateLimitResult = AuthRateLimitAllowed | AuthRateLimitDenied;
 
 interface CredentialState {
   failures: number;
@@ -34,10 +34,6 @@ interface CredentialState {
 }
 
 export function getClientIp(request: FastifyRequest): string {
-  const forwarded = request.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.length > 0) {
-    return forwarded.split(',')[0]?.trim() || request.ip;
-  }
   return request.ip || 'unknown';
 }
 
@@ -54,12 +50,30 @@ export function createAuthRateLimiter(
 ) {
   const credentials = new Map<string, CredentialState>();
   const ipAttempts = new Map<string, number[]>();
+  const maxTrackedKeys = 10_000;
+
+  function pruneState(t: number) {
+    for (const [key, timestamps] of ipAttempts) {
+      const recent = pruneTimestamps(timestamps, t);
+      if (recent.length === 0) ipAttempts.delete(key);
+      else ipAttempts.set(key, recent);
+    }
+    const credentialTtl = Math.max(config.lockoutMs, config.ipWindowMs) * 2;
+    for (const [key, state] of credentials) {
+      if (t - state.lastAttemptAt > credentialTtl && (!state.lockedUntil || t >= state.lockedUntil)) {
+        credentials.delete(key);
+      }
+    }
+    while (ipAttempts.size > maxTrackedKeys) ipAttempts.delete(ipAttempts.keys().next().value!);
+    while (credentials.size > maxTrackedKeys) credentials.delete(credentials.keys().next().value!);
+  }
 
   function pruneTimestamps(timestamps: number[], t: number): number[] {
     return timestamps.filter((ts) => t - ts < config.ipWindowMs);
   }
 
   function checkIp(ip: string, t: number): AuthRateLimitResult {
+    pruneState(t);
     const key = ip || 'unknown';
     const recent = pruneTimestamps(ipAttempts.get(key) ?? [], t);
     if (recent.length >= config.maxAttemptsPerIpPerWindow) {
@@ -215,5 +229,3 @@ export function createAuthRateLimiter(
     },
   };
 }
-
-export type AuthRateLimiter = ReturnType<typeof createAuthRateLimiter>;

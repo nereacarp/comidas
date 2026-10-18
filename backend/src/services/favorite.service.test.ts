@@ -7,6 +7,7 @@ function createMockPrisma() {
     householdMember: { findUnique: vi.fn() },
     userFavorite: {
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       create: vi.fn(),
       delete: vi.fn(),
       findMany: vi.fn(),
@@ -72,12 +73,12 @@ describe('FavoriteService', () => {
 
   describe('isFavorited', () => {
     it('should return true when favorited', async () => {
-      mockPrisma.userFavorite.findUnique.mockResolvedValue({ id: 'f1' });
+      mockPrisma.userFavorite.findFirst.mockResolvedValue({ id: 'f1' });
       expect(await service.isFavorited('u1', 'r1')).toBe(true);
     });
 
     it('should return false when not favorited', async () => {
-      mockPrisma.userFavorite.findUnique.mockResolvedValue(null);
+      mockPrisma.userFavorite.findFirst.mockResolvedValue(null);
       expect(await service.isFavorited('u1', 'r1')).toBe(false);
     });
   });

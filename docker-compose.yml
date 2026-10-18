@@ -1,8 +1,11 @@
+name: comidas
+
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
+      NODE_ENV: development
       POSTGRES_USER: comidas
       POSTGRES_PASSWORD: comidas
       POSTGRES_DB: comidas
@@ -20,7 +23,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: sh -c "pnpm db:generate && pnpm dev"
+    command: sh -c "pnpm db:generate && pnpm exec prisma migrate deploy && pnpm dev"
     restart: unless-stopped
     ports:
       - "3001:3001"
@@ -30,6 +33,7 @@ services:
       PORT: "3001"
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       ADMIN_SECRET: ${ADMIN_SECRET:-dev-admin}
+      ALLOWED_ORIGINS: http://localhost:5175,http://localhost:5174
     depends_on:
       db:
         condition: service_healthy
@@ -51,6 +55,22 @@ services:
       - ./frontend/public:/app/public
       - ./frontend/index.html:/app/index.html
       - ./frontend/vite.config.ts:/app/vite.config.ts
+
+  backoffice:
+    build:
+      context: ./backoffice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5174:5174"
+    environment:
+      VITE_API_URL: http://localhost:3001
+    depends_on:
+      - backend
+    volumes:
+      - ./backoffice/src:/app/src
+      - ./backoffice/index.html:/app/index.html
+      - ./backoffice/vite.config.ts:/app/vite.config.ts
 
 
 volumes:

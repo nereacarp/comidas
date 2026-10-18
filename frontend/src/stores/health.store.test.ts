@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useHealthStore } from './health.store';
+import { todayIsoLocal } from '../lib/health';
 
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -15,10 +16,13 @@ Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock, wri
 
 beforeEach(() => {
   localStorageMock.clear();
+  useHealthStore.getState().setActiveUser(null);
+  useHealthStore.getState().setActiveUser('user-a');
   useHealthStore.setState({
     profile: { weight: null, height: null, age: null, sex: null, activityLevel: 'moderate' },
     waterIntakeMl: 0,
-    waterResetDate: new Date().toISOString().split('T')[0],
+    waterResetDate: todayIsoLocal(),
+    mealServings: {},
   });
 });
 
@@ -60,11 +64,11 @@ describe('checkDailyReset', () => {
     useHealthStore.setState({ waterIntakeMl: 1500, waterResetDate: '2020-01-01' });
     useHealthStore.getState().checkDailyReset();
     expect(useHealthStore.getState().waterIntakeMl).toBe(0);
-    expect(useHealthStore.getState().waterResetDate).toBe(new Date().toISOString().split('T')[0]);
+    expect(useHealthStore.getState().waterResetDate).toBe(todayIsoLocal());
   });
 
   it('does not reset if date is today', () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayIsoLocal();
     useHealthStore.setState({ waterIntakeMl: 1500, waterResetDate: today });
     useHealthStore.getState().checkDailyReset();
     expect(useHealthStore.getState().waterIntakeMl).toBe(1500);
@@ -76,6 +80,21 @@ describe('persistence mock', () => {
     const spy = vi.spyOn(localStorageMock, 'setItem');
     useHealthStore.getState().setProfile({ weight: 65 });
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('keeps health data separated by authenticated user', () => {
+    useHealthStore.getState().setProfile({ weight: 65 });
+    useHealthStore.getState().setActiveUser('user-b');
+    expect(useHealthStore.getState().profile.weight).toBeNull();
+
+    useHealthStore.getState().setProfile({ weight: 80 });
+    useHealthStore.getState().setActiveUser('user-a');
+    expect(useHealthStore.getState().profile.weight).toBe(65);
+  });
+
+  it('stores personal meal servings in quarter-serving steps', () => {
+    useHealthStore.getState().setMealServings('meal-1', 1.6);
+    expect(useHealthStore.getState().mealServings['meal-1']).toBe(1.5);
   });
 });
 

@@ -15,6 +15,7 @@ interface HouseholdMembersSectionProps {
   onAddMember: (e: React.FormEvent) => void;
   onRemoveMember: (userId: string) => void;
   onRoleChange: (userId: string, role: 'EDITOR' | 'VIEWER') => void;
+  onTransferOwnership: (userId: string, name: string) => void;
   onCancelInvite?: (invitationId: string) => void;
 }
 
@@ -28,11 +29,11 @@ export function HouseholdMembersSection({
   onAddMember,
   onRemoveMember,
   onRoleChange,
+  onTransferOwnership,
   onCancelInvite,
 }: Readonly<HouseholdMembersSectionProps>) {
   return (
     <section className="card p-6">
-      <h3 className="type-display-sm mb-4">Miembros</h3>
       {pendingInvites.length > 0 && (
         <ul className="space-y-2 mb-4">
           {pendingInvites.map((invite) => (
@@ -61,7 +62,7 @@ export function HouseholdMembersSection({
       )}
       <ul className="space-y-2 mb-4">
         {members?.map((m) => (
-          <li key={m.id} className="flex items-center justify-between surface-row">
+          <li key={m.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between surface-row">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-sm font-semibold text-ink">{m.user.name}</span>
               <span className="text-sm text-muted hidden sm:inline">{m.user.email}</span>
@@ -69,7 +70,7 @@ export function HouseholdMembersSection({
                 <span className={ROLE_BADGE_CLASS[m.role]}>{ROLE_LABELS[m.role]}</span>
               )}
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               {isOwner && m.role !== 'OWNER' && (
                 <select
                   value={m.role}
@@ -80,6 +81,15 @@ export function HouseholdMembersSection({
                   <option value="EDITOR">Editor</option>
                   <option value="VIEWER">Solo lectura</option>
                 </select>
+              )}
+              {m.user.id !== currentUserId && isOwner && (
+                <button
+                  type="button"
+                  onClick={() => onTransferOwnership(m.user.id, m.user.name)}
+                  className="btn-neutral !px-3 !py-2 !text-xs"
+                >
+                  Hacer propietario
+                </button>
               )}
               {m.user.id !== currentUserId && isOwner && (
                 <button
@@ -96,7 +106,11 @@ export function HouseholdMembersSection({
       </ul>
       {isOwner && (
         <form onSubmit={onAddMember} className="flex flex-col sm:flex-row gap-2">
+          <label htmlFor="new-household-member-email" className="sr-only">
+            Email de la persona que quieres invitar
+          </label>
           <input
+            id="new-household-member-email"
             type="email"
             placeholder="Email del nuevo miembro"
             value={newMemberEmail}
@@ -110,6 +124,9 @@ export function HouseholdMembersSection({
           >
             Invitar
           </button>
+          <p className="basis-full text-xs text-muted">
+            Si todavía no tiene cuenta, recibirá un enlace para registrarse y aceptar la invitación.
+          </p>
         </form>
       )}
     </section>

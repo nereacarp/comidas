@@ -2,7 +2,7 @@ import { useId, useState } from 'react';
 import { useShowCalories } from '../hooks/useShowCalories';
 import { FlameIcon, ClockIcon, HeartIcon, HeartOutlineIcon } from './ui/Icons';
 import { IngredientFilterField, type IngredientFilterSelection } from './IngredientFilterField';
-import { MEAL_TYPES, mealTypeChipStyle } from '../utils/meal-type';
+import { MEAL_TYPES, mealTypeChipStyle } from '../lib/meal-type';
 import { KCAL_RANGES } from '../lib/kcal-ranges';
 import { TIME_RANGES } from '../lib/time-ranges';
 import type { MealType, Tag } from '../types';

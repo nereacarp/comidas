@@ -12,21 +12,12 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
-      selfDestroying: true,
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            urlPattern: /\/households\//,
-            handler: 'NetworkOnly',
-          },
-          {
-            urlPattern: /\/auth\//,
-            handler: 'NetworkOnly',
-          },
-          {
-            urlPattern: /\/favorites/,
+            urlPattern: /\/api\//,
             handler: 'NetworkOnly',
           },
         ],
@@ -72,11 +63,11 @@ export default defineConfig({
       usePolling: true,
     },
     proxy: {
-      '/auth': { target: 'http://localhost:3001', changeOrigin: true },
-      '/households': { target: 'http://localhost:3001', changeOrigin: true },
-      '/favorites': { target: 'http://localhost:3001', changeOrigin: true },
-      '/invitations': { target: 'http://localhost:3001', changeOrigin: true },
-      '/public': { target: 'http://localhost:3001', changeOrigin: true },
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (requestPath) => requestPath.replace(/^\/api/, ''),
+      },
     },
   },
 });

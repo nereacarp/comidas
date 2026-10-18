@@ -1,5 +1,5 @@
-/** Empty string = same-origin (Vite dev proxy). Otherwise direct API URL. */
-const API_URL = import.meta.env.VITE_API_URL ?? '';
+/** Development uses the collision-free /api proxy; deployments can override it. */
+const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 let _onUnauthorized: (() => void) | null = null;
 export function registerUnauthorizedHandler(fn: () => void) {
@@ -14,37 +14,24 @@ export interface ApiClient {
   delete: <T>(path: string, body?: unknown, signal?: AbortSignal) => Promise<T>;
 }
 
-function getToken(): string | null {
-  return localStorage.getItem('token');
-}
-
 async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   const headers: Record<string, string> = {};
   if (body) {
     headers['Content-Type'] = 'application/json';
   }
-  const token = getToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
   const response = await fetch(`${API_URL}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
     signal,
+    credentials: 'include',
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     const message = error.error || error.message || `HTTP ${response.status}`;
-    if (response.status === 401 && getToken()) {
+    if (response.status === 401) {
       _onUnauthorized?.();
-    }
-    if (response.status === 404) {
-      throw new Error(
-        `${message}. Comprueba que el backend está en marcha (puerto 3001 con Docker).`
-      );
     }
     throw new Error(message);
   }

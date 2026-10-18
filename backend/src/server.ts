@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import cookie from '@fastify/cookie';
 import authPlugin from './plugins/auth.js';
 import { authRoutes } from './routes/auth.routes.js';
 import { householdRoutes } from './routes/household.routes.js';
@@ -14,8 +15,19 @@ import { pantryRoutes } from './routes/pantry.routes.js';
 import { storageLocationRoutes } from './routes/storage-location.routes.js';
 import { adminRoutes } from './routes/admin.routes.js';
 import { publicRoutes } from './routes/public.routes.js';
+import { validateEnvironment } from './lib/env.js';
 
-const fastify = Fastify({ logger: true });
+validateEnvironment();
+
+const fastify = Fastify({
+  logger: true,
+  bodyLimit: 1024 * 1024,
+  trustProxy: process.env.VERCEL
+    ? true
+    : process.env.NODE_ENV === 'production'
+    ? ['loopback', 'linklocal', 'uniquelocal']
+    : false,
+});
 
 async function start() {
   await fastify.register(helmet, {
@@ -49,11 +61,17 @@ async function start() {
         cb(new Error('Not allowed by CORS'), false);
       }
     },
+    credentials: true,
   });
 
-  // Fix: browser translation extensions modify the body without updating Content-Length
-  fastify.addHook('preParsing', async (request) => {
-    delete (request.headers as Record<string, unknown>)['content-length'];
+  await fastify.register(cookie);
+
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return;
+    const origin = request.headers.origin;
+    if (origin && !allowedOrigins.includes(origin)) {
+      return reply.status(403).send({ error: 'Origen no autorizado' });
+    }
   });
 
   await fastify.register(authPlugin);

@@ -3,6 +3,9 @@ import { createPantryService } from './pantry.service.js';
 
 function createMockPrisma() {
   return {
+    storageLocation: {
+      findFirst: vi.fn(),
+    },
     pantryItem: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
@@ -54,6 +57,14 @@ describe('PantryService', () => {
       });
     });
 
+    it('rejects a storage location from another household', async () => {
+      mockPrisma.storageLocation.findFirst.mockResolvedValue(null);
+      await expect(service.add('h1', {
+        name: 'Arroz', quantity: 500, unit: 'g', locationId: 'foreign-location',
+      })).rejects.toMatchObject({ statusCode: 400 });
+      expect(mockPrisma.pantryItem.create).not.toHaveBeenCalled();
+    });
+
     it('should merge quantity when item with same name+unit exists', async () => {
       mockPrisma.pantryItem.findFirst.mockResolvedValue({
         id: 'p1', name: 'Arroz', quantity: 500, unit: 'g',
@@ -88,6 +99,14 @@ describe('PantryService', () => {
     it('should throw if item does not belong to household', async () => {
       mockPrisma.pantryItem.findFirst.mockResolvedValue(null);
       await expect(service.update('p1', 'other', { name: 'Test' })).rejects.toThrow('Ingrediente no encontrado');
+    });
+
+    it('rejects moving an item to a location from another household', async () => {
+      mockPrisma.pantryItem.findFirst.mockResolvedValue({ id: 'p1', householdId: 'h1' });
+      mockPrisma.storageLocation.findFirst.mockResolvedValue(null);
+      await expect(service.update('p1', 'h1', { locationId: 'foreign-location' }))
+        .rejects.toMatchObject({ statusCode: 400 });
+      expect(mockPrisma.pantryItem.update).not.toHaveBeenCalled();
     });
   });
 

@@ -1,19 +1,19 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GEMINI_MODELS, isRetriableGeminiError } from '../lib/gemini-models.js';
 
-export interface KcalIngredientInput {
+interface KcalIngredientInput {
   name: string;
   quantity?: number;
   unit?: string;
 }
 
-export interface EstimateKcalInput {
+interface EstimateKcalInput {
   ingredients: KcalIngredientInput[];
   servings?: number;
   title?: string;
 }
 
-export interface EstimateKcalResult {
+interface EstimateKcalResult {
   kcal: number;
   explanation?: string;
 }

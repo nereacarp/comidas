@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { AppleIcon, HeartIcon, MoonIcon, SunIcon, UtensilsIcon } from '../ui/Icons';
 import { MealPlanRecipeLink, mealPlanItemRecipeId } from './MealPlanRecipeLink';
-import { mealTypePlanLabelStyle, mealTypePlanSectionStyle } from '../../utils/meal-type';
+import { mealTypePlanLabelStyle, mealTypePlanSectionStyle } from '../../lib/meal-type';
 import type { MealPlanItem, MealType } from '../../types';
 
 const MEAL_TYPE_ORDER: MealType[] = ['DESAYUNO', 'COMIDA', 'CENA', 'SNACK'];

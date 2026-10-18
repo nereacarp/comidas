@@ -46,6 +46,15 @@ export function createMealPlanService(prisma: PrismaClientType) {
     async updateItem(itemId: string, householdId: string, input: UpdateMealPlanItemInput) {
       const item = await prisma.mealPlanItem.findFirst({ where: { id: itemId, householdId } });
       if (!item) throw new Error('Item del plan no encontrado');
+      if (input.recipeId) {
+        const recipe = await prisma.recipe.findFirst({
+          where: { id: input.recipeId, householdId },
+          select: { id: true },
+        });
+        if (!recipe) {
+          throw Object.assign(new Error('Receta no encontrada en este hogar'), { statusCode: 400 });
+        }
+      }
       return prisma.mealPlanItem.update({
         where: { id: itemId },
         data: {

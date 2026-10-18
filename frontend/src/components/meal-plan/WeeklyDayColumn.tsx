@@ -3,7 +3,7 @@ import { FlameIcon } from '../ui/Icons';
 import type { DayClipboardAction } from '../../lib/meal-plan-day-clipboard';
 import { MealSlot } from '../MealSlot';
 import { getDayKcalStatus, kcalStatusLabel, kcalStatusTone } from '../../lib/meal-plan-kcal-status';
-import { mealTypePlanLabelStyle, mealTypePlanSectionStyle } from '../../utils/meal-type';
+import { mealTypePlanLabelStyle, mealTypePlanSectionStyle } from '../../lib/meal-type';
 import type { MealPlanItem, MealType } from '../../types';
 
 interface MealTypeConfig {
@@ -38,10 +38,12 @@ interface WeeklyDayColumnProps {
   onDayClipboard?: () => void;
   dayClipboardBusy?: boolean;
   isClipboardSource?: boolean;
-  hasMeals?: boolean;
 }
 
-function kcalAccentColor(status: ReturnType<typeof getDayKcalStatus>, _colors: PlanKcalColors): string {
+function kcalAccentColor(status: ReturnType<typeof getDayKcalStatus>, colors: PlanKcalColors): string {
+  if (status === 'on-track') return colors.onTrack;
+  if (status === 'over') return colors.over;
+  if (status === 'under') return colors.under;
   return kcalStatusTone(status).color;
 }
 
@@ -65,7 +67,6 @@ export function WeeklyDayColumn({
   onDayClipboard,
   dayClipboardBusy = false,
   isClipboardSource = false,
-  hasMeals: _hasMeals = false,
 }: Readonly<WeeklyDayColumnProps>) {
   const status = getDayKcalStatus(totalKcal, calorieTarget);
   const diff = calorieTarget !== null && totalKcal > 0 ? totalKcal - calorieTarget : null;

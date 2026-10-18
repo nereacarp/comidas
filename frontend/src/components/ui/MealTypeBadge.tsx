@@ -1,4 +1,4 @@
-import { MEAL_TYPE_LABELS, mealTypeBadgeStyle } from '../../utils/meal-type';
+import { MEAL_TYPE_LABELS, mealTypeBadgeStyle } from '../../lib/meal-type';
 import type { MealType } from '../../types';
 
 interface MealTypeBadgeProps {

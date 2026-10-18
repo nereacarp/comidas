@@ -5,7 +5,7 @@ import {
   renderStorageLocationIcon,
   type StorageLocationIconId,
 } from '../../lib/storage-location-icons';
-import { resolveLocationColor } from '../../utils/color-styles';
+import { resolveLocationColor } from '../../lib/color-styles';
 import { routes } from '../../lib/routes';
 import { getSectionBtnClass } from '../../lib/section-accents';
 

@@ -21,8 +21,7 @@ export function AppearanceSection() {
 
   return (
     <Card className="p-5 sm:p-6">
-      <h2 className="type-card-title">Apariencia</h2>
-      <p className="type-hint mt-1">Elige cómo se ve la interfaz en este dispositivo.</p>
+      <p className="type-hint">Elige cómo se ve la interfaz en este dispositivo.</p>
       <div className="mt-4 grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Tema de la aplicación">
         {OPTIONS.map(({ value, label, hint }) => {
           const selected = preference === value;

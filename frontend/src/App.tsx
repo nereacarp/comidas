@@ -1,41 +1,56 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { RecipesPage } from './pages/RecipesPage';
-import { RecipeDetailPage } from './pages/RecipeDetailPage';
-import { CreateRecipePage } from './pages/CreateRecipePage';
-import { EditRecipePage } from './pages/EditRecipePage';
-import { MealPlanPage } from './pages/MealPlanPage';
-import { FavoritesPage } from './pages/FavoritesPage';
-import { ShoppingListPage } from './pages/ShoppingListPage';
-import { ShoppingListDetailPage } from './pages/ShoppingListDetailPage';
-import { PantryPage } from './pages/PantryPage';
-import { HouseholdSettingsPage } from './pages/HouseholdSettingsPage';
-import { SharedShoppingListPage } from './pages/SharedShoppingListPage';
-import { HealthPage } from './pages/HealthPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
+import { AcceptInvitationPage } from './pages/AcceptInvitationPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './layouts/AppLayout';
 import { LegacyHouseholdRedirect } from './components/LegacyHouseholdRedirect';
-import { NotFoundPage } from './pages/NotFoundPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { useAuthStore } from './stores/auth.store';
 import { registerUnauthorizedHandler } from './api/client';
 
 registerUnauthorizedHandler(() => useAuthStore.getState().logout());
 
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((module) => ({ default: module.DashboardPage })));
+const RecipesPage = lazy(() => import('./pages/RecipesPage').then((module) => ({ default: module.RecipesPage })));
+const RecipeDetailPage = lazy(() => import('./pages/RecipeDetailPage').then((module) => ({ default: module.RecipeDetailPage })));
+const CreateRecipePage = lazy(() => import('./pages/CreateRecipePage').then((module) => ({ default: module.CreateRecipePage })));
+const EditRecipePage = lazy(() => import('./pages/EditRecipePage').then((module) => ({ default: module.EditRecipePage })));
+const MealPlanPage = lazy(() => import('./pages/MealPlanPage').then((module) => ({ default: module.MealPlanPage })));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage').then((module) => ({ default: module.FavoritesPage })));
+const ShoppingListPage = lazy(() => import('./pages/ShoppingListPage').then((module) => ({ default: module.ShoppingListPage })));
+const ShoppingListDetailPage = lazy(() => import('./pages/ShoppingListDetailPage').then((module) => ({ default: module.ShoppingListDetailPage })));
+const PantryPage = lazy(() => import('./pages/PantryPage').then((module) => ({ default: module.PantryPage })));
+const HouseholdSettingsPage = lazy(() => import('./pages/HouseholdSettingsPage').then((module) => ({ default: module.HouseholdSettingsPage })));
+const SharedShoppingListPage = lazy(() => import('./pages/SharedShoppingListPage').then((module) => ({ default: module.SharedShoppingListPage })));
+const HealthPage = lazy(() => import('./pages/HealthPage').then((module) => ({ default: module.HealthPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then((module) => ({ default: module.TermsPage })));
+
 function RootRedirect() {
-  const token = useAuthStore((s) => s.token);
-  return <Navigate to={token ? '/dashboard' : '/login'} replace />;
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
 }
 
 export function App() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-page text-muted">Cargando...</div>}>
+      <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
       <Route path="/shared/:token" element={<SharedShoppingListPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route path="/households/:householdId/*" element={<LegacyHouseholdRedirect />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
@@ -54,6 +69,7 @@ export function App() {
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

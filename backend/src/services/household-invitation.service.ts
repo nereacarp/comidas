@@ -1,5 +1,6 @@
 import type { PrismaClientType } from '../lib/prisma.js';
 import type { AddMemberInput } from '../types/index.js';
+import { appPublicUrl, sendMail } from './mail.service.js';
 
 const invitationInclude = {
   household: { select: { id: true, name: true } },
@@ -27,15 +28,13 @@ export function createHouseholdInvitationService(prisma: PrismaClientType) {
       const user = await prisma.user.findFirst({
         where: { email: { equals: email, mode: 'insensitive' } },
       });
-      if (!user) {
-        throw new Error('Usuario no encontrado');
-      }
-
-      const existingMember = await prisma.householdMember.findUnique({
-        where: { userId_householdId: { userId: user.id, householdId } },
-      });
-      if (existingMember) {
-        throw new Error('El usuario ya es miembro');
+      if (user) {
+        const existingMember = await prisma.householdMember.findUnique({
+          where: { userId_householdId: { userId: user.id, householdId } },
+        });
+        if (existingMember) {
+          throw new Error('El usuario ya es miembro');
+        }
       }
 
       const existingInvite = await prisma.householdInvitation.findUnique({
@@ -46,8 +45,8 @@ export function createHouseholdInvitationService(prisma: PrismaClientType) {
         throw new Error('Ya hay una invitación pendiente para este email');
       }
 
-      if (existingInvite) {
-        return prisma.householdInvitation.update({
+      const invitation = existingInvite
+        ? await prisma.householdInvitation.update({
           where: { id: existingInvite.id },
           data: {
             role,
@@ -56,18 +55,20 @@ export function createHouseholdInvitationService(prisma: PrismaClientType) {
             respondedAt: null,
           },
           include: invitationInclude,
+        })
+        : await prisma.householdInvitation.create({
+          data: { householdId, email, role, invitedById },
+          include: invitationInclude,
         });
-      }
 
-      return prisma.householdInvitation.create({
-        data: {
-          householdId,
-          email,
-          role,
-          invitedById,
-        },
-        include: invitationInclude,
+      const registerUrl = `${appPublicUrl()}/register?email=${encodeURIComponent(email)}`;
+      await sendMail({
+        to: email,
+        subject: `${inviter.name} te invita a un hogar en Comidas`,
+        text: `Te han invitado a ${invitation.household.name}. Entra o crea tu cuenta con este correo: ${registerUrl}`,
+        html: `<p>${inviter.name} te ha invitado a <strong>${invitation.household.name}</strong>.</p><p><a href="${registerUrl}">Abrir la invitación</a></p>`,
       });
+      return invitation;
     },
 
     async listPendingForUser(userEmail: string) {

@@ -1,4 +1,5 @@
 export const routes = {
+  login: '/login',
   dashboard: '/dashboard',
   health: '/health',
   recipes: '/recipes',
@@ -11,4 +12,10 @@ export const routes = {
   shoppingList: (id: string) => `/shopping-lists/${id}`,
   pantry: '/pantry',
   settings: '/settings',
+  privacy: '/privacy',
+  terms: '/terms',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  verifyEmail: '/verify-email',
+  acceptInvitation: '/accept-invitation',
 } as const;

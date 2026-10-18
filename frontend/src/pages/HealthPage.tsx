@@ -4,7 +4,7 @@ import type { DietPlan } from '../stores/health.store';
 import { CaloriePlanRow } from '../components/health/CaloriePlanRow';
 import { WeightGoalCard } from '../components/health/WeightGoalCard';
 import { CalorieTargetStatus } from '../components/health/CalorieTargetStatus';
-import { HEALTH_PLAN_STYLES } from '../utils/health-plan-styles';
+import { HEALTH_PLAN_STYLES } from '../lib/health-plan-styles';
 import { Card } from '../components/ui/Card';
 import { CaloriePreferenceToggle } from '../components/settings/CaloriePreferenceToggle';
 import { useShowCalories } from '../hooks/useShowCalories';
@@ -20,10 +20,14 @@ import {
   calculateCalorieGoals,
   calculateTDEE,
   calculateWaterGoal,
-} from '../utils/health';
-import type { ActivityLevel, Sex } from '../utils/health';
-import { DIET_PLAN_LABELS } from '../utils/health-plans';
-import { dailyKcalForWeightGoalSave, resolveWeightGoalByPlan } from '../utils/weight-goal';
+  isAdultHealthAge,
+  MAX_ADULT_AGE,
+  MIN_ADULT_AGE,
+  todayIsoLocal,
+} from '../lib/health';
+import type { ActivityLevel, Sex } from '../lib/health';
+import { DIET_PLAN_LABELS } from '../lib/health-plans';
+import { dailyKcalForWeightGoalSave, resolveWeightGoalByPlan } from '../lib/weight-goal';
 
 const WATER_SHORTCUTS = [
   { label: '+50 ml', ml: 50 },
@@ -46,6 +50,8 @@ export function HealthPage() {
     addWater,
     removeWater,
     checkDailyReset,
+    mealServings,
+    setMealServings,
   } = useHealthStore();
 
   const [form, setForm] = useState({
@@ -60,7 +66,7 @@ export function HealthPage() {
   const householdId = useHouseholdId();
   const mealPlanApi = useMemo(() => createMealPlanApi(apiClient), []);
   const calorieTarget = useHealthCalorieTarget();
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayIsoLocal();
 
   useEffect(() => {
     checkDailyReset();
@@ -78,8 +84,11 @@ export function HealthPage() {
     () =>
       todayMeals
         .filter((i) => i.recipe?.kcal)
-        .reduce((sum, i) => sum + (i.recipe?.kcal ?? 0), 0),
-    [todayMeals],
+        .reduce(
+          (sum, i) => sum + (i.recipe?.kcal ?? 0) * (mealServings[i.id] ?? 1),
+          0,
+        ),
+    [todayMeals, mealServings],
   );
 
   const handleSave = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -95,7 +104,9 @@ export function HealthPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const profileComplete = Boolean(profile.weight && profile.height && profile.age && profile.sex);
+  const profileComplete = Boolean(
+    profile.weight && profile.height && isAdultHealthAge(profile.age) && profile.sex,
+  );
 
   const waterGoalL = profileComplete
     ? calculateWaterGoal(profile.weight!, profile.activityLevel)
@@ -209,13 +220,16 @@ export function HealthPage() {
                 <input
                   id="age"
                   type="number"
-                  min="10"
-                  max="120"
+                  min={MIN_ADULT_AGE}
+                  max={MAX_ADULT_AGE}
                   placeholder="30"
                   value={form.age}
                   onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))}
                   className="input"
                 />
+                <p className="mt-1 text-[10px] text-muted">
+                  Cálculo disponible sólo para personas adultas ({MIN_ADULT_AGE}–{MAX_ADULT_AGE} años).
+                </p>
               </Field>
               <Field label="Sexo" id="sex">
                 <select
@@ -367,6 +381,51 @@ export function HealthPage() {
               </div>
             )}
 
+            {todayMeals.some((item) => item.recipe?.kcal) && (
+              <div className="mt-4 rounded-[var(--radius-control)] border border-[var(--border-subtle)] bg-page p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-ink">Raciones de hoy</p>
+                    <p className="mt-0.5 text-[10px] text-muted">
+                      Las kcal de cada receta son por ración. Ajusta aquí cuánto has consumido tú.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-2">
+                  {todayMeals
+                    .filter((item) => item.recipe?.kcal)
+                    .map((item) => {
+                      const servings = mealServings[item.id] ?? 1;
+                      const kcalPerServing = item.recipe?.kcal ?? 0;
+                      return (
+                        <div key={item.id} className="flex items-center gap-3 text-xs">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium text-ink">{item.recipe?.title}</p>
+                            <p className="text-[10px] text-muted">
+                              {kcalPerServing.toLocaleString('es-ES')} kcal/ración ·{' '}
+                              {Math.round(kcalPerServing * servings).toLocaleString('es-ES')} kcal
+                            </p>
+                          </div>
+                          <label className="flex shrink-0 items-center gap-1.5 text-muted">
+                            <span>Raciones</span>
+                            <input
+                              type="number"
+                              min="0.25"
+                              max="10"
+                              step="0.25"
+                              value={servings}
+                              onChange={(event) => setMealServings(item.id, Number(event.target.value) || 1)}
+                              className="input w-20 py-1.5 text-right tabular-nums"
+                              aria-label={`Raciones consumidas de ${item.recipe?.title ?? 'la receta'}`}
+                            />
+                          </label>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
             {!selectedPlan && goals && (
               <p className="mt-4 rounded-[var(--radius-control)] bg-page px-3 py-2.5 text-xs text-muted">
                 Define un objetivo de peso o elige un plan para el plan de comidas.
@@ -459,7 +518,7 @@ export function HealthPage() {
           )}
         </div>
         <p className="pt-2 text-center text-xs text-muted">
-          Los datos de salud se guardan solo en este dispositivo y no se sincronizan entre navegadores.
+          Los datos de salud se guardan en este dispositivo, separados por cuenta, y no se sincronizan entre navegadores.
         </p>
       </div>
     </div>

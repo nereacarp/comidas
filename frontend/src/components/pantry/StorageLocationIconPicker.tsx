@@ -3,7 +3,7 @@ import {
   type StorageLocationIconId,
   renderStorageLocationIcon,
 } from '../../lib/storage-location-icons';
-import { accentChipStyle } from '../../utils/color-styles';
+import { accentChipStyle } from '../../lib/color-styles';
 
 interface StorageLocationIconPickerProps {
   value: StorageLocationIconId;

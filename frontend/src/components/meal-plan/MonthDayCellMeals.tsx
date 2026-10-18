@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { AppleIcon, HeartIcon, MoonIcon, SunIcon, UtensilsIcon } from '../ui/Icons';
-import { MEAL_TYPE_LABELS } from '../../utils/meal-type';
-import { mealTypePlanLabelStyle, mealTypePlanSectionStyle } from '../../utils/meal-type';
+import { MEAL_TYPE_LABELS } from '../../lib/meal-type';
+import { mealTypePlanLabelStyle, mealTypePlanSectionStyle } from '../../lib/meal-type';
 import { MonthDayMealsGrid, MonthMealThumb, sortMealPlanItemsByType } from './MonthMealThumb';
 import type { MealPlanItem, MealType } from '../../types';
 

@@ -1,6 +1,6 @@
 import type { PrismaClientType } from './prisma.js';
 
-export interface IngredientNameSuggestion {
+interface IngredientNameSuggestion {
   name: string;
   inPantry: boolean;
 }

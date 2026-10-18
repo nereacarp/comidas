@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildPlanProjections,
   shouldHighlightPlanForTier,
-} from '../../utils/weight-goal-plans';
-import { tierPlanKey } from '../../utils/deficit-planning';
+} from '../../lib/weight-goal-plans';
+import { tierPlanKey } from '../../lib/deficit-planning';
 import { Card } from '../ui/Card';
 import { CheckIcon, FlameIcon } from '../ui/Icons';
 import { useHealthStore } from '../../stores/health.store';
@@ -13,17 +13,18 @@ import {
   calculateCalorieGoals,
   calculateTDEE,
   daysUntilDate,
+  getWeightGoalSafetyError,
   targetDateFromWeeks,
   todayIsoLocal,
   type Sex,
-} from '../../utils/health';
+} from '../../lib/health';
 import {
   dailyKcalForWeightGoalSave,
   recommendedWeeksHint,
   resolveWeightGoalByTimeline,
   type WeightGoalMode,
   type WeightGoalResolution,
-} from '../../utils/weight-goal';
+} from '../../lib/weight-goal';
 import { WeightGoalPreview } from './WeightGoalPreview';
 
 function Field({
@@ -46,7 +47,7 @@ interface WeightGoalCardProps {
   heightCm: number;
   age: number;
   sex: Sex;
-  activityLevel: import('../../utils/health').ActivityLevel;
+  activityLevel: import('../../lib/health').ActivityLevel;
   profileComplete: boolean;
 }
 
@@ -80,18 +81,18 @@ export function WeightGoalCard({
   const [saved, setSaved] = useState(false);
   const formDirtyRef = useRef(false);
 
-  const hydrateFromStore = () => {
+  const hydrateFromStore = useCallback(() => {
     setMode('timeline');
     setTargetWeight(weightGoal.targetWeight?.toString() ?? '');
     setTargetDate(weightGoal.targetDate ?? '');
     setWeeks(weightGoal.targetWeeks != null ? String(Math.round(weightGoal.targetWeeks)) : '');
     if (weightGoal.linkedPlan) setPickedPlan(weightGoal.linkedPlan);
-  };
+  }, [weightGoal]);
 
   useEffect(() => {
     if (formDirtyRef.current) return;
     hydrateFromStore();
-  }, [weightGoal]);
+  }, [hydrateFromStore]);
 
   const markDirty = () => {
     formDirtyRef.current = true;
@@ -102,6 +103,17 @@ export function WeightGoalCard({
   };
 
   const targetKg = targetWeight ? Number(targetWeight) : null;
+  const targetSafetyError = useMemo(
+    () =>
+      targetKg
+        ? getWeightGoalSafetyError({
+            currentWeightKg,
+            targetWeightKg: targetKg,
+            heightCm,
+          })
+        : null,
+    [targetKg, currentWeightKg, heightCm],
+  );
 
   const timelineTargetDate = useMemo(() => {
     const w = Number(weeks);
@@ -111,7 +123,9 @@ export function WeightGoalCard({
   }, [weeks, targetDate, today]);
 
   const resolution: WeightGoalResolution | null = useMemo(() => {
-    if (!profileComplete || !targetKg || targetKg <= 0 || !bmr || !tdee) return null;
+    if (!profileComplete || !targetKg || targetKg <= 0 || targetSafetyError || !bmr || !tdee) {
+      return null;
+    }
 
     const base = {
       currentWeightKg,
@@ -135,6 +149,7 @@ export function WeightGoalCard({
     sex,
     goals,
     today,
+    targetSafetyError,
   ]);
 
   const kgToLose =
@@ -201,7 +216,9 @@ export function WeightGoalCard({
     applyWeightGoal({
       targetWeight: targetKg,
       targetDate: resolution.result.targetDate,
-      targetWeeks: mode === 'timeline' && weeks ? Number(weeks) : null,
+      targetWeeks: mode === 'timeline'
+        ? Math.round(resolution.result.weeksToGoal * 10) / 10
+        : null,
       mode,
       linkedPlan,
       active: true,
@@ -283,9 +300,16 @@ export function WeightGoalCard({
               setTargetWeight(e.target.value);
             }}
             onKeyDown={preventEnterSubmit}
+            aria-invalid={Boolean(targetSafetyError)}
             className="input"
           />
         </Field>
+
+        {targetSafetyError && (
+          <p className="text-xs font-medium text-[var(--danger-text)]" role="alert">
+            {targetSafetyError}
+          </p>
+        )}
 
         {medicalGuideHint && (
           <p className="text-xs text-muted">{medicalGuideHint}</p>
@@ -324,7 +348,7 @@ export function WeightGoalCard({
           />
         )}
 
-        {!resolution && targetKg && (
+        {!resolution && targetKg && !targetSafetyError && (
           <p className="text-xs text-muted">
             {'Indica semanas o una fecha futura.'}
           </p>

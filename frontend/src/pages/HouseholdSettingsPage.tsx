@@ -18,6 +18,7 @@ import { ColorPicker } from '../components/ui/ColorPicker';
 import { StorageLocationIconPicker } from '../components/pantry/StorageLocationIconPicker';
 import { CaloriePreferenceToggle } from '../components/settings/CaloriePreferenceToggle';
 import { DeleteAccountSection } from '../components/settings/DeleteAccountSection';
+import { ChangePasswordSection } from '../components/settings/ChangePasswordSection';
 import { DeleteHouseholdSection } from '../components/settings/DeleteHouseholdSection';
 import { HouseholdInvitationsSection } from '../components/settings/HouseholdInvitationsSection';
 import { HouseholdNameForm } from '../components/settings/HouseholdNameForm';
@@ -26,6 +27,7 @@ import { HouseholdSwitcherSection } from '../components/settings/HouseholdSwitch
 import { EditableTagRow } from '../components/settings/EditableTagRow';
 import { EditableLocationRow } from '../components/settings/EditableLocationRow';
 import { AppearanceSection } from '../components/settings/AppearanceSection';
+import { ExportDataSection } from '../components/settings/ExportDataSection';
 import { APP_PALETTE } from '../lib/app-palette';
 import { COLOR_PICKER_PRESETS } from '../lib/color-picker-presets';
 import {
@@ -34,7 +36,7 @@ import {
 } from '../lib/storage-location-icons';
 import { pantryColorForNewLocation } from '../lib/pantry-location-colors';
 import { SETTINGS_PANTRY_LOCATIONS_HASH } from '../lib/settings-sections';
-import { resolveLocationColor } from '../utils/color-styles';
+import { resolveLocationColor } from '../lib/color-styles';
 import type { HouseholdInvitation, Tag, StorageLocation } from '../types';
 
 const householdsApi = createHouseholdsApi(apiClient);
@@ -131,6 +133,21 @@ export function HouseholdSettingsPage() {
       await refreshHousehold();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cambiar rol');
+    }
+  };
+
+  const handleTransferOwnership = async (newOwnerUserId: string, memberName: string) => {
+    if (!householdId) return;
+    const confirmed = window.confirm(
+      `¿Transferir la propiedad de ${household?.name ?? 'este hogar'} a ${memberName}? Tu rol pasará a Editor.`,
+    );
+    if (!confirmed) return;
+    setError('');
+    try {
+      await householdsApi.transferOwnership(householdId, newOwnerUserId);
+      await refreshHousehold();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo transferir la propiedad');
     }
   };
 
@@ -331,10 +348,33 @@ export function HouseholdSettingsPage() {
     <div className="space-y-6 w-full">
       <PageHeader title="Ajustes del hogar" />
 
-      <AppearanceSection />
+      <nav className="settings-section-nav" aria-label="Secciones de ajustes">
+        <a href="#settings-appearance">Apariencia</a>
+        <a href="#settings-households">Hogares</a>
+        <a href="#settings-account">Cuenta</a>
+        <a href="#settings-members">Miembros</a>
+        <a href="#settings-organization">Organización</a>
+        <a href="#settings-danger">Zona peligrosa</a>
+      </nav>
 
-      <HouseholdInvitationsSection />
-      <HouseholdSwitcherSection />
+      <div id="settings-appearance" className="settings-section-group scroll-mt-28">
+        <h2 className="settings-section-title">Apariencia</h2>
+        <AppearanceSection />
+      </div>
+
+      <div id="settings-households" className="settings-section-group scroll-mt-28">
+        <h2 className="settings-section-title">Hogares</h2>
+        <HouseholdInvitationsSection />
+        <HouseholdSwitcherSection />
+        <section className="card p-6">
+          <h3 className="type-display-sm mb-4">Nombre del hogar</h3>
+          <HouseholdNameForm
+            name={household.name}
+            canEdit={canEdit}
+            onSave={handleSaveHouseholdName}
+          />
+        </section>
+      </div>
 
       <div className="md:hidden">
         <SidebarUserFooter
@@ -350,37 +390,38 @@ export function HouseholdSettingsPage() {
         </div>
       )}
 
-      <section className="card p-6">
-        <h3 className="type-display-sm mb-4">Nombre del hogar</h3>
-        <HouseholdNameForm
-          name={household.name}
-          canEdit={canEdit}
-          onSave={handleSaveHouseholdName}
+      <div id="settings-account" className="settings-section-group scroll-mt-28">
+        <h2 className="settings-section-title">Cuenta</h2>
+        <section className="card p-6">
+          <p className="text-sm text-muted mb-4">
+            Preferencias personales. No afectan al resto del hogar.
+          </p>
+          <CaloriePreferenceToggle id="show-calories-settings" />
+          <ChangePasswordSection />
+          <ExportDataSection />
+          <DeleteAccountSection />
+        </section>
+      </div>
+
+      <div id="settings-members" className="settings-section-group scroll-mt-28">
+        <h2 className="settings-section-title">Miembros</h2>
+        <HouseholdMembersSection
+          members={household.members}
+          pendingInvites={sentInvitations}
+          currentUserId={user?.id}
+          isOwner={!!isOwner}
+          newMemberEmail={newMemberEmail}
+          onNewMemberEmailChange={setNewMemberEmail}
+          onAddMember={handleAddMember}
+          onRemoveMember={handleRemoveMember}
+          onRoleChange={handleRoleChange}
+          onTransferOwnership={handleTransferOwnership}
+          onCancelInvite={isOwner ? handleCancelInvite : undefined}
         />
-      </section>
+      </div>
 
-      <section className="card p-6">
-        <h3 className="type-display-sm mb-2">Tu cuenta</h3>
-        <p className="text-sm text-muted mb-4">
-          Preferencias personales. No afectan al resto del hogar.
-        </p>
-        <CaloriePreferenceToggle id="show-calories-settings" />
-        <DeleteAccountSection />
-      </section>
-
-      <HouseholdMembersSection
-        members={household.members}
-        pendingInvites={sentInvitations}
-        currentUserId={user?.id}
-        isOwner={!!isOwner}
-        newMemberEmail={newMemberEmail}
-        onNewMemberEmailChange={setNewMemberEmail}
-        onAddMember={handleAddMember}
-        onRemoveMember={handleRemoveMember}
-        onRoleChange={handleRoleChange}
-        onCancelInvite={isOwner ? handleCancelInvite : undefined}
-      />
-
+      <div id="settings-organization" className="settings-section-group scroll-mt-28">
+      <h2 className="settings-section-title">Organización</h2>
       <section className="card p-6">
         <h3 className="type-display-sm mb-4">Tags</h3>
         {tags.length > 0 && (
@@ -412,6 +453,8 @@ export function HouseholdSettingsPage() {
             label="Color del tag"
           />
           <input
+            id="new-tag-name"
+            aria-label="Nombre del nuevo tag"
             type="text"
             placeholder="Nombre del tag"
             value={newTagName}
@@ -471,6 +514,8 @@ export function HouseholdSettingsPage() {
               label="Color de la ubicacion"
             />
             <input
+              id="new-location-name"
+              aria-label="Nombre de la nueva ubicación"
               type="text"
               placeholder="Nueva ubicación"
               value={newLocationName}
@@ -487,7 +532,10 @@ export function HouseholdSettingsPage() {
           </div>
         </form>
       </section>
+      </div>
 
+      <div id="settings-danger" className="settings-section-group scroll-mt-28">
+      <h2 className="settings-section-title settings-section-title--danger">Zona peligrosa</h2>
       {!isOwner && (
         <section className="card p-6">
           <h3 className="type-display-sm mb-2">Salir del hogar</h3>
@@ -511,6 +559,7 @@ export function HouseholdSettingsPage() {
           onDeleted={reloadHousehold}
         />
       )}
+      </div>
 
     </div>
   );

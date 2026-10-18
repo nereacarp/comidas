@@ -113,6 +113,10 @@ export function AuthLayout({ title, children, footer }: Readonly<AuthLayoutProps
               <div className="auth-card__accent" aria-hidden />
               <div className="auth-card__body">{children}</div>
             </div>
+            <nav aria-label="Información legal" className="mt-5 flex justify-center gap-4 text-xs text-muted">
+              <Link className="underline hover:text-ink" to={routes.privacy}>Privacidad</Link>
+              <Link className="underline hover:text-ink" to={routes.terms}>Condiciones</Link>
+            </nav>
           </section>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createRecipeService } from './recipe.service.js';
 
 function createMockPrisma() {
-  return {
+  const mock = {
     $queryRaw: vi.fn().mockResolvedValue([]),
     recipe: {
       create: vi.fn(),
@@ -22,6 +22,10 @@ function createMockPrisma() {
     recipeTag: {
       deleteMany: vi.fn(),
     },
+  };
+  return {
+    ...mock,
+    $transaction: vi.fn(async (callback: (tx: typeof mock) => unknown) => callback(mock)),
   };
 }
 

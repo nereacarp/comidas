@@ -7,13 +7,14 @@ import { RecipePicker } from './RecipePicker';
 import { useHousehold } from '../hooks/useHousehold';
 import { AppleIcon, ChevronLeftIcon, ChevronRightIcon, HeartIcon, MoonIcon, SunIcon, UtensilsIcon } from './ui/Icons';
 import { MonthDayCellMeals, sortMealPlanItemsByType } from './meal-plan/MonthDayCellMeals';
+import { UndoToast } from './ui/UndoToast';
 import {
   MEAL_TYPE_LABELS,
   mealTypeBadgeStyle,
   mealTypePlanLabelStyle,
   mealTypePlanMobileAddStyle,
   mealTypePlanMobileBlockStyle,
-} from '../utils/meal-type';
+} from '../lib/meal-type';
 import type { MealPlanItem, MealType, Recipe } from '../types';
 
 const mealPlanApi = createMealPlanApi(apiClient);
@@ -72,6 +73,7 @@ export function MonthlyCalendar({ householdId }: Readonly<MonthlyCalendarProps>)
   const [items, setItems] = useState<MealPlanItem[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<{ date: string; mealType: MealType } | null>(null);
+  const [deletedItem, setDeletedItem] = useState<MealPlanItem | null>(null);
 
   const { dates, startDate, endDate } = getMonthDates(year, month);
 
@@ -129,7 +131,22 @@ export function MonthlyCalendar({ householdId }: Readonly<MonthlyCalendarProps>)
   };
 
   const handleRemove = async (itemId: string) => {
+    const item = items.find((candidate) => candidate.id === itemId);
     await mealPlanApi.deleteItem(householdId, itemId);
+    await loadItems();
+    if (item) setDeletedItem(item);
+  };
+
+  const handleUndoRemove = async () => {
+    if (!deletedItem) return;
+    const item = deletedItem;
+    setDeletedItem(null);
+    const recipeId = mealPlanItemRecipeId(item);
+    await mealPlanApi.addItem(householdId, {
+      date: item.date.slice(0, 10),
+      mealType: item.mealType,
+      ...(recipeId ? { recipeId } : { customMealName: item.customMealName ?? 'Comida' }),
+    });
     await loadItems();
   };
 
@@ -138,6 +155,13 @@ export function MonthlyCalendar({ householdId }: Readonly<MonthlyCalendarProps>)
 
   return (
     <div className="flex-1 min-h-0 flex flex-col md:block">
+      {deletedItem && (
+        <UndoToast
+          message="Comida eliminada del plan."
+          onUndo={handleUndoRemove}
+          onDismiss={() => setDeletedItem(null)}
+        />
+      )}
       {/* Mobile: sticky month nav + scrollable feed */}
       <div className="md:hidden flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-between py-2 shrink-0 gap-3">
@@ -267,6 +291,7 @@ interface MobileMonthFeedProps {
 function MobileMonthFeed({ dates, today, getItemsForDate, onAdd, onRemove, canEdit }: Readonly<MobileMonthFeedProps>) {
   const todayRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const firstDate = dates[0];
 
   useEffect(() => {
     if (todayRef.current && scrollRef.current) {
@@ -274,7 +299,7 @@ function MobileMonthFeed({ dates, today, getItemsForDate, onAdd, onRemove, canEd
       const el = todayRef.current;
       container.scrollTop = el.offsetTop - container.offsetTop;
     }
-  }, [dates[0]]);
+  }, [firstDate]);
 
   return (
     <div ref={scrollRef} className="meal-plan-mobile-feed">

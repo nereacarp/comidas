@@ -27,7 +27,7 @@ describe('HouseholdInvitationService', () => {
 
   describe('invite', () => {
     it('creates a pending invitation for an existing user', async () => {
-      mockPrisma.user.findUnique.mockResolvedValueOnce({ id: 'u1', email: 'owner@test.com' });
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ id: 'u1', email: 'owner@test.com', name: 'Owner' });
       mockPrisma.user.findFirst.mockResolvedValue({ id: 'u2', email: 'guest@test.com' });
       mockPrisma.householdMember.findUnique.mockResolvedValue(null);
       mockPrisma.householdInvitation.findUnique.mockResolvedValue(null);
@@ -35,6 +35,7 @@ describe('HouseholdInvitationService', () => {
         id: 'inv1',
         email: 'guest@test.com',
         status: 'PENDING',
+        household: { id: 'h1', name: 'Casa' },
       });
 
       await service.invite('h1', 'u1', { email: 'guest@test.com' });
@@ -48,6 +49,24 @@ describe('HouseholdInvitationService', () => {
           }),
         }),
       );
+    });
+
+    it('invites an email that does not have an account yet', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ id: 'u1', email: 'owner@test.com', name: 'Owner' });
+      mockPrisma.user.findFirst.mockResolvedValue(null);
+      mockPrisma.householdInvitation.findUnique.mockResolvedValue(null);
+      mockPrisma.householdInvitation.create.mockResolvedValue({
+        id: 'inv-new', email: 'future@test.com', status: 'PENDING',
+        household: { id: 'h1', name: 'Casa' },
+      });
+
+      const result = await service.invite('h1', 'u1', { email: 'future@test.com', role: 'VIEWER' });
+
+      expect(result.id).toBe('inv-new');
+      expect(mockPrisma.householdMember.findUnique).not.toHaveBeenCalled();
+      expect(mockPrisma.householdInvitation.create).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({ email: 'future@test.com', role: 'VIEWER' }),
+      }));
     });
 
     it('throws if user is already a member', async () => {

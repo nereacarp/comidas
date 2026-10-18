@@ -2,7 +2,12 @@ import type { FastifyInstance } from 'fastify';
 import { createHouseholdService } from '../services/household.service.js';
 import { createHouseholdInvitationService } from '../services/household-invitation.service.js';
 import { prisma } from '../lib/prisma.js';
-import { createHouseholdSchema, addMemberSchema, updateMemberRoleSchema } from '../lib/validation.js';
+import {
+  createHouseholdSchema,
+  addMemberSchema,
+  transferOwnershipSchema,
+  updateMemberRoleSchema,
+} from '../lib/validation.js';
 import { householdGuard } from '../plugins/household-guard.js';
 
 export async function householdRoutes(fastify: FastifyInstance) {
@@ -123,6 +128,29 @@ export async function householdRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: message });
       }
     }
+  );
+
+  fastify.post<{ Params: { householdId: string } }>(
+    '/households/:householdId/transfer-ownership',
+    { preHandler: [householdGuard] },
+    async (request, reply) => {
+      const parsed = transferOwnershipSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({ error: parsed.error.issues[0].message });
+      }
+      try {
+        const household = await householdService.transferOwnership(
+          request.params.householdId,
+          request.user.id,
+          parsed.data,
+        );
+        return reply.send(household);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'No se pudo transferir la propiedad';
+        const status = message.startsWith('Solo el propietario') ? 403 : 400;
+        return reply.status(status).send({ error: message });
+      }
+    },
   );
 
   fastify.delete<{ Params: { householdId: string; userId: string } }>(

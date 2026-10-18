@@ -6,6 +6,7 @@ import { RecipePicker } from './RecipePicker';
 import { useHousehold } from '../hooks/useHousehold';
 import { useShowCalories } from '../hooks/useShowCalories';
 import { useHealthCalorieTarget } from '../hooks/useHealthCalorieTarget';
+import { useHealthStore } from '../stores/health.store';
 import { getDayKcalStatus, kcalStatusLabel, kcalStatusTone } from '../lib/meal-plan-kcal-status';
 import { WeeklyCalendarDesktop } from './meal-plan/WeeklyCalendarDesktop';
 import type { PlanKcalColors } from './meal-plan/WeeklyDayColumn';
@@ -15,11 +16,12 @@ import { isPasteTarget } from '../lib/meal-plan-day-clipboard';
 import { isWeekPasteTarget } from '../lib/meal-plan-week-clipboard';
 import { getWeekDates, todayIsoLocal } from '../lib/meal-plan-dates';
 import { MealPlanRecipeLink, mealPlanItemRecipeId } from './meal-plan/MealPlanRecipeLink';
+import { UndoToast } from './ui/UndoToast';
 import {
   mealTypeAvatarStyle,
   mealTypePlanLabelStyle,
   mealTypePlanMobileBlockStyle,
-} from '../utils/meal-type';
+} from '../lib/meal-type';
 import { AppleIcon, ChevronLeftIcon, ChevronRightIcon, FlameIcon, MoonIcon, SunIcon, UtensilsIcon } from './ui/Icons';
 import type { MealPlanItem, MealType, Recipe } from '../types';
 
@@ -62,12 +64,14 @@ export function WeeklyCalendar({ householdId }: WeeklyCalendarProps) {
   const { canEdit } = useHousehold();
   const showCalories = useShowCalories();
   const { getCalorieTarget } = useHealthCalorieTarget();
+  const mealServings = useHealthStore((state) => state.mealServings);
   const planKcalColors = MEAL_PLAN_KCAL_COLORS;
   const [weekOffset, setWeekOffset] = useState(0);
   const [items, setItems] = useState<MealPlanItem[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<{ date: string; mealType: MealType } | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [deletedItem, setDeletedItem] = useState<MealPlanItem | null>(null);
 
   const dates = getWeekDates(weekOffset);
   const startDate = dates[0];
@@ -94,7 +98,7 @@ export function WeeklyCalendar({ householdId }: WeeklyCalendarProps) {
   const getDayKcal = (date: string) =>
     items
       .filter((i) => i.date.startsWith(date) && i.recipe?.kcal)
-      .reduce((sum, i) => sum + (i.recipe?.kcal ?? 0), 0);
+      .reduce((sum, i) => sum + (i.recipe?.kcal ?? 0) * (mealServings[i.id] ?? 1), 0);
 
   const handleAdd = (date: string, mealType: MealType) => {
     setPickerTarget({ date, mealType });
@@ -131,7 +135,22 @@ export function WeeklyCalendar({ householdId }: WeeklyCalendarProps) {
   };
 
   const handleRemove = async (itemId: string) => {
+    const item = items.find((candidate) => candidate.id === itemId);
     await mealPlanApi.deleteItem(householdId, itemId);
+    await loadItems();
+    if (item) setDeletedItem(item);
+  };
+
+  const handleUndoRemove = async () => {
+    if (!deletedItem) return;
+    const item = deletedItem;
+    setDeletedItem(null);
+    const recipeId = mealPlanItemRecipeId(item);
+    await mealPlanApi.addItem(householdId, {
+      date: item.date.slice(0, 10),
+      mealType: item.mealType,
+      ...(recipeId ? { recipeId } : { customMealName: item.customMealName ?? 'Comida' }),
+    });
     await loadItems();
   };
 
@@ -193,11 +212,18 @@ export function WeeklyCalendar({ householdId }: WeeklyCalendarProps) {
   const weekToolbarPasteReady = isWeekPasteTarget(startDate, copiedWeekStart);
 
   useEffect(() => {
-    setSelectedDayIndex(getTodayIndex(dates));
+    setSelectedDayIndex(getTodayIndex(getWeekDates(weekOffset)));
   }, [weekOffset]);
 
   return (
     <div>
+      {deletedItem && (
+        <UndoToast
+          message="Comida eliminada del plan."
+          onUndo={handleUndoRemove}
+          onDismiss={() => setDeletedItem(null)}
+        />
+      )}
       {/* Week navigation */}
       <div
         className={
@@ -422,7 +448,6 @@ export function WeeklyCalendar({ householdId }: WeeklyCalendarProps) {
         onDayClipboard={handleDayClipboard}
         getDayClipboardLabel={getDayClipboardLabel}
         getDayClipboardAction={getDayClipboardAction}
-        dayHasMeals={dayHasMeals}
         canEdit={canEdit}
         showCalories={showCalories}
       />

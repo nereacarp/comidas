@@ -196,4 +196,45 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('changePassword', () => {
+    it('replaces the hash and invalidates previous sessions', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: '1',
+        email: 'test@test.com',
+        passwordHash: 'old-hash',
+      });
+      vi.mocked(bcrypt.compare).mockResolvedValue(true);
+      vi.mocked(bcrypt.hash).mockResolvedValue('new-hash');
+      mockPrisma.user.update.mockResolvedValue({
+        email: 'test@test.com',
+        sessionVersion: 2,
+      });
+
+      const result = await service.changePassword('1', 'old-password', 'new-password-123');
+
+      expect(result.sessionVersion).toBe(2);
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: {
+          passwordHash: 'new-hash',
+          sessionVersion: { increment: 1 },
+        },
+        select: { email: true, sessionVersion: true },
+      });
+    });
+
+    it('does not change the password when the current one is wrong', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: '1',
+        passwordHash: 'old-hash',
+      });
+      vi.mocked(bcrypt.compare).mockResolvedValue(false);
+
+      await expect(
+        service.changePassword('1', 'wrong-password', 'new-password-123'),
+      ).rejects.toThrow('Contraseña actual incorrecta');
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+    });
+  });
 });

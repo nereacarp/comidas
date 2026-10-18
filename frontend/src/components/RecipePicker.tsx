@@ -167,7 +167,7 @@ export function RecipePicker({ isOpen, onClose, onSelect, onCustomMeal, househol
                   {showCalories && recipe.kcal ? (
                     <span className="text-xs text-muted font-semibold inline-flex items-center gap-1">
                       <FlameIcon className="w-3.5 h-3.5" />
-                      {recipe.kcal} kcal
+                      {recipe.kcal} kcal/ración
                     </span>
                   ) : recipe.description ? (
                     <span className="text-xs text-muted block truncate">{recipe.description.slice(0, 60)}</span>

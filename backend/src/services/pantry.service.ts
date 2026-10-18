@@ -15,6 +15,17 @@ interface UpdatePantryItemInput {
 }
 
 export function createPantryService(prisma: PrismaClientType) {
+  async function assertLocationBelongsToHousehold(householdId: string, locationId?: string | null) {
+    if (!locationId) return;
+    const location = await prisma.storageLocation.findFirst({
+      where: { id: locationId, householdId },
+      select: { id: true },
+    });
+    if (!location) {
+      throw Object.assign(new Error('Ubicación no encontrada en este hogar'), { statusCode: 400 });
+    }
+  }
+
   return {
     async list(householdId: string) {
       return prisma.pantryItem.findMany({
@@ -25,6 +36,7 @@ export function createPantryService(prisma: PrismaClientType) {
     },
 
     async add(householdId: string, input: AddPantryItemInput) {
+      await assertLocationBelongsToHousehold(householdId, input.locationId);
       const existing = await prisma.pantryItem.findFirst({
         where: {
           householdId,
@@ -57,6 +69,7 @@ export function createPantryService(prisma: PrismaClientType) {
     async update(itemId: string, householdId: string, input: UpdatePantryItemInput) {
       const item = await prisma.pantryItem.findFirst({ where: { id: itemId, householdId } });
       if (!item) throw new Error('Ingrediente no encontrado');
+      await assertLocationBelongsToHousehold(householdId, input.locationId);
       return prisma.pantryItem.update({
         where: { id: itemId },
         data: input,

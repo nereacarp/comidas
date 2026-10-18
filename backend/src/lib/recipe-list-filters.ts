@@ -22,7 +22,7 @@ function parseOptionalInt(value: unknown): number | undefined {
   return n;
 }
 
-export interface ParsedRecipeListFilters {
+interface ParsedRecipeListFilters {
   search?: string;
   mealType?: MealType;
   tagIds?: string[];

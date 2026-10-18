@@ -9,8 +9,8 @@ describe('getUserInitials', () => {
   });
 
   it('returns up to two initials from the name', () => {
-    expect(getUserInitials('Nerea')).toBe('N');
-    expect(getUserInitials('Nerea Carpintero')).toBe('NC');
+    expect(getUserInitials('Ana')).toBe('A');
+    expect(getUserInitials('Ana García')).toBe('AG');
     expect(getUserInitials('  Ana   María   López  ')).toBe('AM');
   });
 });

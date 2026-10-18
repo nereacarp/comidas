@@ -14,6 +14,18 @@ import {
 import { householdGuard } from '../plugins/household-guard.js';
 import { canEditGuard } from '../plugins/can-edit-guard.js';
 
+const costlyRequests = new Map<string, number[]>();
+
+function allowCostlyRequest(key: string, max: number, windowMs: number): boolean {
+  const now = Date.now();
+  const recent = (costlyRequests.get(key) ?? []).filter((timestamp) => now - timestamp < windowMs);
+  if (recent.length >= max) return false;
+  recent.push(now);
+  costlyRequests.set(key, recent);
+  if (costlyRequests.size > 10_000) costlyRequests.delete(costlyRequests.keys().next().value!);
+  return true;
+}
+
 export async function recipeRoutes(fastify: FastifyInstance) {
   const recipeService = createRecipeService(prisma);
   const recipeImportService = createRecipeImportService({
@@ -59,6 +71,10 @@ export async function recipeRoutes(fastify: FastifyInstance) {
       if (!parsed.success) {
         return reply.status(400).send({ error: parsed.error.issues[0].message });
       }
+      if (!allowCostlyRequest(`import:${request.user.id}`, 5, 10 * 60 * 1000)) {
+        reply.header('Retry-After', '600');
+        return reply.status(429).send({ error: 'Demasiadas importaciones. Inténtalo de nuevo más tarde.' });
+      }
       try {
         const data = await recipeImportService.parseFromUrl(parsed.data.url);
         const warnings: string[] = [];
@@ -89,6 +105,10 @@ export async function recipeRoutes(fastify: FastifyInstance) {
       const parsed = estimateKcalSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.status(400).send({ error: parsed.error.issues[0].message });
+      }
+      if (!allowCostlyRequest(`kcal:${request.user.id}`, 20, 60 * 60 * 1000)) {
+        reply.header('Retry-After', '3600');
+        return reply.status(429).send({ error: 'Demasiadas estimaciones. Inténtalo de nuevo más tarde.' });
       }
       try {
         return await recipeKcalService.estimateFromIngredients(parsed.data);

@@ -127,55 +127,55 @@
     color-scheme: dark;
 
     /* Surfaces: clearer steps between page / card / inset */
-    --palette-page: #111318;
-    --palette-surface: #1a1d26;
-    --palette-ink: #f3f4f8;
-    --palette-muted: #a3adc0;
-    --palette-border: #434a5c;
-    --palette-nav-neutral: #c5ccda;
-    --surface: #1c2029;
-    --surface-raised: #282d3a;
-    --surface-muted: #232833;
+    --palette-page: #0d1016;
+    --palette-surface: #181d27;
+    --palette-ink: #f7f8fb;
+    --palette-muted: #bec6d6;
+    --palette-border: #5f6a82;
+    --palette-nav-neutral: #d8deea;
+    --surface: #181d27;
+    --surface-raised: #252c39;
+    --surface-muted: #202735;
     --overlay: rgb(4 6 10 / 0.72);
 
     /* Brand & accents: slightly lifted for dark backgrounds */
-    --brand: #b8a0e0;
-    --brand-hover: #cab6ec;
-    --brand-soft: color-mix(in oklab, var(--palette-lavender) 32%, var(--surface-raised));
+    --brand: #c7aff2;
+    --brand-hover: #d8c4fa;
+    --brand-soft: color-mix(in oklab, var(--palette-lavender) 42%, var(--surface-raised));
 
-    /* Pastel fills: más saturados (cercanos al modo claro) */
-    --pastel-lavender: color-mix(in oklab, var(--palette-lavender) 52%, #2a2640);
-    --pastel-mint: color-mix(in oklab, var(--palette-mint) 48%, #1a3329);
-    --pastel-peach: color-mix(in oklab, var(--palette-peach) 48%, #3a3020);
-    --pastel-coral: color-mix(in oklab, var(--palette-coral) 48%, #3a2828);
-    --pastel-cyan: color-mix(in oklab, var(--palette-cyan) 46%, #1a2f38);
+    /* Pastel fills: dark enough for pale text, vivid enough to separate sections. */
+    --pastel-lavender: #684f8a;
+    --pastel-mint: #2e6e54;
+    --pastel-peach: #765222;
+    --pastel-coral: #7a3942;
+    --pastel-cyan: #236578;
 
     /* Texto/icono sobre pastels */
-    --pastel-lavender-icon: #e8dcfa;
-    --pastel-mint-icon: #a8ecc8;
-    --pastel-cyan-icon: #a8e8f8;
-    --pastel-peach-icon: #f8dc9a;
-    --pastel-coral-icon: #f8c8c8;
+    --pastel-lavender-icon: #f0e5ff;
+    --pastel-mint-icon: #c2f3d9;
+    --pastel-cyan-icon: #c5f1fb;
+    --pastel-peach-icon: #ffe2a6;
+    --pastel-coral-icon: #ffd1d3;
 
     /* Botones de sección (fondo saturado, texto oscuro) */
-    --accent-btn-lavender: #a888dc;
-    --accent-btn-mint: #4ec492;
-    --accent-btn-peach: #e4b05a;
-    --accent-btn-cyan: #58b8d4;
-    --accent-btn-coral: #e08888;
+    --accent-btn-lavender: #b79ae5;
+    --accent-btn-mint: #62d2a3;
+    --accent-btn-peach: #efbd69;
+    --accent-btn-cyan: #6bc8df;
+    --accent-btn-coral: #ea9a9a;
 
     --success-text: var(--pastel-mint-icon);
-    --danger-text: #f5bcbc;
+    --danger-text: #ffd0d2;
     --warning-text: var(--pastel-peach-icon);
     --info-text: var(--pastel-cyan-icon);
 
     --nav-neutral-bg: color-mix(in oklab, var(--border-subtle) 45%, var(--surface-raised));
 
     --shadow-card:
-      0 0 0 1px color-mix(in oklab, white 7%, transparent),
+      0 0 0 1px color-mix(in oklab, white 11%, transparent),
       0 10px 32px -12px rgb(0 0 0 / 0.55);
     --shadow-elevated:
-      0 0 0 1px color-mix(in oklab, white 9%, transparent),
+      0 0 0 1px color-mix(in oklab, white 14%, transparent),
       0 16px 40px -14px rgb(0 0 0 / 0.62);
   }
 
@@ -2012,6 +2012,10 @@
     @apply grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center sm:gap-4;
   }
 
+  .dashboard-page-header__top {
+    @apply flex min-w-0 items-start justify-between gap-3;
+  }
+
   .dashboard-page-header__title {
     @apply font-display text-2xl sm:text-[1.65rem] font-bold tracking-tight text-ink;
   }
@@ -2405,9 +2409,10 @@
   }
 
   .app-bottom-nav__inner {
-    @apply relative mx-auto flex w-full max-w-lg items-end justify-between px-1;
+    @apply relative z-[2] mx-auto flex w-full max-w-lg items-end justify-between px-1.5;
     min-height: var(--app-bottom-nav-size);
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--surface);
   }
 
   .app-bottom-nav__side {
@@ -2415,9 +2420,9 @@
   }
 
   .app-bottom-nav__link {
-    @apply flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-2 transition-colors duration-200 ease-out;
-    max-width: 3.75rem;
-    min-height: 3.25rem;
+    @apply flex min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 px-1 py-2 transition-colors duration-200 ease-out;
+    max-width: 4.5rem;
+    min-height: 3.75rem;
     color: var(--text-secondary);
   }
 
@@ -2430,7 +2435,7 @@
   }
 
   .app-bottom-nav__label {
-    @apply text-center text-[9px] font-medium leading-tight;
+    @apply max-w-full truncate text-center text-[10px] font-medium leading-tight;
   }
 
   .app-bottom-nav__link--active {
@@ -2473,6 +2478,149 @@
 
   .app-bottom-nav__fab svg {
     @apply h-6 w-6;
+  }
+
+  .dashboard-settings-link {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-control)] border transition-[background,color,border-color,transform] duration-200 ease-out;
+    color: var(--text-secondary);
+    background: var(--surface);
+    border-color: var(--border-subtle);
+  }
+
+  .dashboard-settings-link:hover,
+  .dashboard-settings-link:focus-visible {
+    color: var(--text-primary);
+    background: var(--surface-raised);
+    border-color: color-mix(in oklab, var(--brand) 38%, var(--border-subtle));
+  }
+
+  .dashboard-settings-link:active {
+    transform: scale(0.96);
+  }
+
+  .dashboard-settings-link svg {
+    @apply h-5 w-5;
+  }
+
+  @media (max-width: 479px) {
+    .modal-overlay {
+      z-index: 60;
+      align-items: flex-end;
+      padding: 0.75rem;
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .modal-panel {
+      max-height: calc(100dvh - 1.5rem - env(safe-area-inset-bottom, 0px));
+      border-bottom-left-radius: var(--radius-control);
+      border-bottom-right-radius: var(--radius-control);
+    }
+
+    .modal-panel__header,
+    .modal-panel__body {
+      padding-inline: 1rem;
+    }
+
+    .recipe-ingredient-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    }
+
+    .recipe-ingredient-row__name {
+      grid-column: 1 / -1;
+    }
+
+    .recipe-ingredient-row__quantity,
+    .recipe-ingredient-row__unit {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .form-sticky-wrap {
+      bottom: calc(var(--app-bottom-nav-size) + env(safe-area-inset-bottom, 0px) + 0.5rem);
+    }
+
+    .pantry-page form > .flex.gap-2 > .input,
+    .shopping-add-card form > .flex.gap-2 > .input {
+      min-width: 0;
+    }
+
+    .shopping-item__row {
+      gap: 0.5rem;
+      padding-inline: 0.75rem;
+    }
+
+    .shopping-item__qty {
+      max-width: 5.5rem;
+    }
+  }
+
+  @media (max-width: 339px) {
+    :root {
+      --app-bottom-nav-fab-size: 3.25rem;
+      --page-padding-inline-min: 0.625rem;
+    }
+
+    .app-bottom-nav__inner {
+      padding-inline: 0.25rem;
+    }
+
+    .app-bottom-nav__fab-slot {
+      width: calc(var(--app-bottom-nav-fab-size) + 0.25rem);
+      padding-inline: 0.125rem;
+    }
+
+    .app-bottom-nav__link {
+      padding-inline: 0.25rem;
+    }
+
+    .app-bottom-nav__icon {
+      width: 1.875rem;
+      height: 1.875rem;
+    }
+
+    .app-bottom-nav__label {
+      @apply sr-only;
+    }
+
+    .type-page-title,
+    .dashboard-page-header__title {
+      font-size: 1.375rem;
+    }
+  }
+
+  @media (min-width: 340px) and (max-width: 359px) {
+    :root {
+      --app-bottom-nav-fab-size: 3.25rem;
+      --page-padding-inline-min: 0.625rem;
+    }
+
+    .app-bottom-nav__inner {
+      padding-inline: 0.25rem;
+    }
+
+    .app-bottom-nav__fab-slot {
+      width: calc(var(--app-bottom-nav-fab-size) + 0.25rem);
+      padding-inline: 0.125rem;
+    }
+
+    .app-bottom-nav__link {
+      padding-inline: 0.125rem;
+    }
+
+    .app-bottom-nav__icon {
+      width: 1.875rem;
+      height: 1.875rem;
+    }
+
+    .app-bottom-nav__label {
+      font-size: 8px;
+    }
+
+    .type-page-title,
+    .dashboard-page-header__title {
+      font-size: 1.375rem;
+    }
   }
 
   .app-sidebar {
@@ -3407,18 +3555,22 @@
   }
 
   [data-theme="dark"] .accent-panel {
-    background: var(--surface);
-    border-color: color-mix(in oklab, var(--section-accent-text, var(--border-subtle)) 22%, var(--border-subtle));
+    background: color-mix(
+      in oklab,
+      var(--section-accent-bg, var(--pastel-cyan)) 28%,
+      var(--surface)
+    );
+    border-color: color-mix(in oklab, var(--section-accent-text, var(--border-subtle)) 48%, var(--border-subtle));
   }
 
   [data-theme="dark"] .accent-section-head--emphasis {
     background: color-mix(
       in oklab,
-      var(--section-accent-bg, var(--pastel-cyan)) 72%,
+      var(--section-accent-bg, var(--pastel-cyan)) 92%,
       var(--surface-raised)
     );
     border-bottom: 1px solid
-      color-mix(in oklab, var(--section-accent-text, var(--border-subtle)) 18%, var(--border-subtle));
+      color-mix(in oklab, var(--section-accent-text, var(--border-subtle)) 45%, var(--border-subtle));
   }
 
   [data-theme="dark"] .accent-section-head--emphasis .accent-section-label {
@@ -3429,13 +3581,13 @@
   [data-theme="dark"] .accent-section-count {
     background: color-mix(
       in oklab,
-      var(--section-accent-bg, var(--pastel-cyan)) 55%,
-      var(--surface)
+      var(--section-accent-bg, var(--pastel-cyan)) 82%,
+      var(--surface-raised)
     );
     color: var(--section-accent-text, var(--text-primary));
     border-color: color-mix(
       in oklab,
-      var(--section-accent-text, var(--border-subtle)) 35%,
+      var(--section-accent-text, var(--border-subtle)) 48%,
       var(--border-subtle)
     );
   }
@@ -3462,10 +3614,14 @@
   }
 
   [data-theme="dark"] .pantry-item {
-    background: var(--surface-raised);
+    background: color-mix(
+      in oklab,
+      var(--section-accent-bg, var(--pastel-cyan)) 30%,
+      var(--surface-raised)
+    );
     border-color: color-mix(
       in oklab,
-      var(--section-accent-text, var(--pastel-cyan-icon)) 16%,
+      var(--section-accent-text, var(--pastel-cyan-icon)) 48%,
       var(--border-subtle)
     );
   }
@@ -3473,9 +3629,23 @@
   [data-theme="dark"] .pantry-item:hover {
     background: color-mix(
       in oklab,
-      var(--section-accent-bg, var(--pastel-cyan)) 35%,
+      var(--section-accent-bg, var(--pastel-cyan)) 52%,
       var(--surface-raised)
     );
+  }
+
+  [data-theme="dark"] .pantry-item .accent-pill {
+    background: color-mix(
+      in oklab,
+      var(--section-accent-bg, var(--pastel-cyan)) 78%,
+      var(--surface-raised)
+    );
+    border-color: color-mix(
+      in oklab,
+      var(--section-accent-text, var(--pastel-cyan-icon)) 50%,
+      var(--border-subtle)
+    );
+    color: var(--section-accent-text, var(--pastel-cyan-icon));
   }
 
   [data-theme="dark"] .pantry-location-slot--end-drop.pantry-location-slot--drop-target {
@@ -3494,13 +3664,13 @@
   [data-theme="dark"] .metric-tile,
   [data-theme="dark"] .metric-tile--cyan,
   [data-theme="dark"] .metric-tile--peach {
-    background: color-mix(in oklab, var(--pastel-cyan) 18%, var(--surface-raised));
-    border-color: color-mix(in oklab, var(--pastel-cyan-icon) 28%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-cyan) 34%, var(--surface-raised));
+    border-color: color-mix(in oklab, var(--pastel-cyan-icon) 38%, var(--border-subtle));
   }
 
   [data-theme="dark"] .metric-tile--peach {
-    background: color-mix(in oklab, var(--pastel-peach) 18%, var(--surface-raised));
-    border-color: color-mix(in oklab, var(--pastel-peach-icon) 28%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-peach) 34%, var(--surface-raised));
+    border-color: color-mix(in oklab, var(--pastel-peach-icon) 38%, var(--border-subtle));
   }
 
   [data-theme="dark"] .app-sidebar {
@@ -3588,33 +3758,33 @@
   }
 
   [data-theme="dark"] .btn-section-peach-soft {
-    background: color-mix(in oklab, var(--pastel-peach) 55%, var(--surface-raised));
+    background: color-mix(in oklab, var(--pastel-peach) 68%, var(--surface-raised));
     color: var(--pastel-peach-icon);
   }
 
   [data-theme="dark"] .btn-section-mint-soft {
-    background: color-mix(in oklab, var(--pastel-mint) 55%, var(--surface-raised));
+    background: color-mix(in oklab, var(--pastel-mint) 68%, var(--surface-raised));
     color: var(--pastel-mint-icon);
   }
 
   [data-theme="dark"] .btn-section-cyan-soft {
-    background: color-mix(in oklab, var(--pastel-cyan) 55%, var(--surface-raised));
+    background: color-mix(in oklab, var(--pastel-cyan) 68%, var(--surface-raised));
     color: var(--pastel-cyan-icon);
   }
 
   [data-theme="dark"] .btn-section-coral-soft {
-    background: color-mix(in oklab, var(--pastel-coral) 55%, var(--surface-raised));
+    background: color-mix(in oklab, var(--pastel-coral) 68%, var(--surface-raised));
     color: var(--pastel-coral-icon);
   }
 
   [data-theme="dark"] .stat-pill {
-    background: color-mix(in oklab, var(--pastel-lavender) 58%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-lavender-icon) 35%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-lavender) 70%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-lavender-icon) 42%, var(--border-subtle));
   }
 
   [data-theme="dark"] .dashboard-header-chip--members {
-    background: color-mix(in oklab, var(--pastel-lavender) 62%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-lavender-icon) 30%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-lavender) 72%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-lavender-icon) 40%, var(--border-subtle));
     color: var(--pastel-lavender-icon);
   }
 
@@ -3629,33 +3799,33 @@
   }
 
   [data-theme="dark"] .health-stat-pill--lavender {
-    background: color-mix(in oklab, var(--pastel-lavender) 58%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-lavender-icon) 32%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-lavender) 70%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-lavender-icon) 42%, var(--border-subtle));
   }
 
   [data-theme="dark"] .health-stat-pill--mint {
-    background: color-mix(in oklab, var(--pastel-mint) 55%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-mint-icon) 32%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-mint) 68%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-mint-icon) 42%, var(--border-subtle));
   }
 
   [data-theme="dark"] .health-stat-pill--cyan {
-    background: color-mix(in oklab, var(--pastel-cyan) 55%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-cyan-icon) 32%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-cyan) 68%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-cyan-icon) 42%, var(--border-subtle));
   }
 
   [data-theme="dark"] .health-stat-pill--peach {
-    background: color-mix(in oklab, var(--pastel-peach) 55%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-peach-icon) 32%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-peach) 68%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-peach-icon) 42%, var(--border-subtle));
   }
 
   [data-theme="dark"] .health-water-panel {
-    background: color-mix(in oklab, var(--pastel-cyan) 52%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-cyan-icon) 38%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-cyan) 64%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-cyan-icon) 46%, var(--border-subtle));
   }
 
   [data-theme="dark"] .health-calorie-panel {
-    background: color-mix(in oklab, var(--pastel-peach) 48%, var(--surface));
-    border-color: color-mix(in oklab, var(--pastel-peach-icon) 35%, var(--border-subtle));
+    background: color-mix(in oklab, var(--pastel-peach) 62%, var(--surface));
+    border-color: color-mix(in oklab, var(--pastel-peach-icon) 44%, var(--border-subtle));
   }
 
   [data-theme="dark"] .health-water-progress-fill {
@@ -3667,13 +3837,13 @@
   }
 
   [data-theme="dark"] .dashboard-metric-panel--mint {
-    background: color-mix(in oklab, var(--pastel-mint) 52%, var(--surface)) !important;
-    border-color: color-mix(in oklab, var(--pastel-mint-icon) 38%, var(--border-subtle)) !important;
+    background: color-mix(in oklab, var(--pastel-mint) 64%, var(--surface)) !important;
+    border-color: color-mix(in oklab, var(--pastel-mint-icon) 46%, var(--border-subtle)) !important;
   }
 
   [data-theme="dark"] .dashboard-metric-panel--peach {
-    background: color-mix(in oklab, var(--pastel-peach) 48%, var(--surface)) !important;
-    border-color: color-mix(in oklab, var(--pastel-peach-icon) 35%, var(--border-subtle)) !important;
+    background: color-mix(in oklab, var(--pastel-peach) 62%, var(--surface)) !important;
+    border-color: color-mix(in oklab, var(--pastel-peach-icon) 44%, var(--border-subtle)) !important;
   }
 
   [data-theme="dark"] .progress-track {
@@ -3731,6 +3901,73 @@
   [data-theme="dark"] .recipe-filters__badge-active {
     background: var(--brand);
     color: var(--palette-page);
+  }
+
+  .settings-section-nav {
+    @apply sticky top-2 z-10 flex gap-2 overflow-x-auto rounded-2xl border p-2;
+    background: color-mix(in oklab, var(--surface) 92%, transparent);
+    border-color: var(--border-subtle);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(12px);
+    scrollbar-width: thin;
+  }
+
+  .settings-section-nav a {
+    @apply inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-xs font-bold text-muted transition-colors;
+  }
+
+  .settings-section-nav a:hover,
+  .settings-section-nav a:focus-visible {
+    background: var(--brand-soft);
+    color: var(--brand);
+  }
+
+  .settings-section-group {
+    @apply space-y-4;
+  }
+
+  .settings-section-title {
+    @apply px-1 text-xs font-bold uppercase tracking-[0.16em] text-muted;
+  }
+
+  .settings-section-title--danger {
+    color: var(--danger-text);
+  }
+
+  .undo-toast {
+    @apply fixed bottom-24 left-1/2 z-[80] flex min-h-12 -translate-x-1/2 items-center gap-3 rounded-2xl border px-4 py-3 text-sm shadow-xl md:bottom-6;
+    width: min(calc(100% - 1.5rem), 30rem);
+    background: var(--surface-raised, var(--surface));
+    border-color: color-mix(in oklab, var(--brand) 35%, var(--border-subtle));
+    color: var(--text-primary);
+  }
+
+  .undo-toast span { @apply min-w-0 flex-1; }
+  .undo-toast button { @apply min-h-11 shrink-0 rounded-xl px-2 font-bold; color: var(--brand); }
+  .undo-toast__close { @apply !w-11 !px-0 text-xl; color: var(--text-secondary) !important; }
+
+  @media (max-width: 767px), (pointer: coarse) {
+    .meal-plan-mobile-add-slot,
+    .meal-plan-week-daypill,
+    .meal-plan-slot-remove,
+    .meal-plan-slot-empty-fuera,
+    .meal-plan-exercise-pill,
+    .meal-plan-day-meal .meal-plan-slot-remove {
+      min-height: 44px;
+    }
+
+    .meal-plan-mobile-meal__type {
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+
+    .settings-create-row {
+      flex-wrap: wrap;
+    }
+
+    .settings-create-row__input {
+      flex-basis: calc(100% - 3.5rem);
+    }
   }
 
 }

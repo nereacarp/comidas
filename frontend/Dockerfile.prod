@@ -1,6 +1,6 @@
 FROM node:22-alpine@sha256:968df39aedcea65eeb078fb336ed7191baf48f972b4479711397108be0966920 AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
 
@@ -10,9 +10,15 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 ARG VITE_API_URL
+ARG VITE_LEGAL_OPERATOR
+ARG VITE_LEGAL_CONTACT
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_LEGAL_OPERATOR=$VITE_LEGAL_OPERATOR
+ENV VITE_LEGAL_CONTACT=$VITE_LEGAL_CONTACT
 
-RUN pnpm build
+RUN test -n "$VITE_LEGAL_OPERATOR" \
+    && test -n "$VITE_LEGAL_CONTACT" \
+    && pnpm build
 
 # ---- Runtime ----
 FROM nginx:alpine

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createStorageLocationsApi } from './storage-locations';
+import type { ApiClient } from './client';
 
 const client = {
   get: vi.fn(),
@@ -8,7 +9,7 @@ const client = {
   delete: vi.fn(),
 };
 
-const api = createStorageLocationsApi(client as any);
+const api = createStorageLocationsApi(client as unknown as ApiClient);
 
 describe('StorageLocationsApi', () => {
   it('should list locations', async () => {

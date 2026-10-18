@@ -6,6 +6,7 @@ function createMockPrisma() {
     household: {
       create: vi.fn(),
       findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
     },
@@ -19,6 +20,7 @@ function createMockPrisma() {
     user: {
       findUnique: vi.fn(),
     },
+    $transaction: vi.fn(),
   };
 }
 
@@ -28,6 +30,7 @@ describe('HouseholdService', () => {
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
+    mockPrisma.$transaction.mockImplementation(async (callback: (tx: typeof mockPrisma) => unknown) => callback(mockPrisma));
     service = createHouseholdService(mockPrisma as any);
   });
 
@@ -185,6 +188,50 @@ describe('HouseholdService', () => {
 
       await expect(service.leaveHousehold('h1', 'u1'))
         .rejects.toThrow('El propietario no puede abandonar el hogar');
+    });
+  });
+
+  describe('transferOwnership', () => {
+    it('transfers ownership atomically and demotes the previous owner', async () => {
+      mockPrisma.householdMember.findUnique
+        .mockResolvedValueOnce({ id: 'owner-membership', userId: 'u1', role: 'OWNER' })
+        .mockResolvedValueOnce({ id: 'next-membership', userId: 'u2', role: 'VIEWER' });
+      mockPrisma.householdMember.update.mockResolvedValue({});
+      mockPrisma.household.findUniqueOrThrow.mockResolvedValue({
+        id: 'h1',
+        members: [
+          { userId: 'u1', role: 'EDITOR' },
+          { userId: 'u2', role: 'OWNER' },
+        ],
+      });
+
+      const result = await service.transferOwnership('h1', 'u1', { newOwnerUserId: 'u2' });
+
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(expect.any(Function), { isolationLevel: 'Serializable' });
+      expect(mockPrisma.householdMember.update).toHaveBeenNthCalledWith(1, {
+        where: { id: 'owner-membership' }, data: { role: 'EDITOR' },
+      });
+      expect(mockPrisma.householdMember.update).toHaveBeenNthCalledWith(2, {
+        where: { id: 'next-membership' }, data: { role: 'OWNER' },
+      });
+      expect(result.members[1].role).toBe('OWNER');
+    });
+
+    it('rejects transfers to a person outside the household', async () => {
+      mockPrisma.householdMember.findUnique
+        .mockResolvedValueOnce({ id: 'owner-membership', role: 'OWNER' })
+        .mockResolvedValueOnce(null);
+      await expect(service.transferOwnership('h1', 'u1', { newOwnerUserId: 'other' }))
+        .rejects.toThrow('El nuevo propietario debe ser miembro del hogar');
+      expect(mockPrisma.householdMember.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects a transfer attempted by an editor', async () => {
+      mockPrisma.householdMember.findUnique
+        .mockResolvedValueOnce({ id: 'editor-membership', role: 'EDITOR' })
+        .mockResolvedValueOnce({ id: 'next-membership', role: 'VIEWER' });
+      await expect(service.transferOwnership('h1', 'u1', { newOwnerUserId: 'u2' }))
+        .rejects.toThrow('Solo el propietario actual puede transferir el hogar');
     });
   });
 });

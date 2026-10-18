@@ -6,11 +6,12 @@ import { applyLocalPreferences } from '../lib/user-preferences';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<boolean>;
+  acceptInvitation: (token: string, name: string, password: string) => Promise<void>;
   logout: () => void;
   loadProfile: () => Promise<void>;
   clearError: () => void;
@@ -26,20 +27,23 @@ function isNetworkError(error: unknown): boolean {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: localStorage.getItem('token'),
+  isAuthenticated: localStorage.getItem('session_hint') === '1',
   isLoading: false,
   error: null,
 
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const { user, token } = await authApi.login({ email, password });
-      localStorage.setItem('token', token);
-      set({ user: applyLocalPreferences(user), token, isLoading: false });
+      const { user } = await authApi.login({ email, password });
+      localStorage.setItem('session_hint', '1');
+      set({ user: applyLocalPreferences(user), isAuthenticated: true, isLoading: false });
     } catch (error) {
+      const serverMessage = error instanceof Error ? error.message : '';
       const message = isNetworkError(error)
         ? 'No se ha podido conectar. Comprueba tu conexión.'
-        : 'Email o contraseña incorrectos.';
+        : ['Cuenta suspendida', 'Email no verificado'].includes(serverMessage)
+          ? serverMessage
+          : 'Email o contraseña incorrectos.';
       set({ error: message, isLoading: false });
       throw error;
     }
@@ -48,21 +52,48 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (email, password, name) => {
     set({ isLoading: true, error: null });
     try {
-      const { user, token } = await authApi.register({ email, password, name });
-      localStorage.setItem('token', token);
-      set({ user: applyLocalPreferences(user), token, isLoading: false });
+      const result = await authApi.register({ email, password, name });
+      if ('requiresEmailVerification' in result) {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        return true;
+      }
+      const { user } = result;
+      localStorage.setItem('session_hint', '1');
+      set({ user: applyLocalPreferences(user), isAuthenticated: true, isLoading: false });
+      return false;
     } catch (error) {
       const message = isNetworkError(error)
         ? 'No se ha podido conectar. Comprueba tu conexión.'
-        : 'Email o contraseña incorrectos.';
+        : error instanceof Error ? error.message : 'No se ha podido crear la cuenta.';
+      set({ error: message, isLoading: false });
+      throw error;
+    }
+  },
+
+  acceptInvitation: async (token, name, password) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { user } = await authApi.acceptUserInvitation({
+        token,
+        name,
+        password,
+        acceptedTerms: true,
+      });
+      localStorage.setItem('session_hint', '1');
+      set({ user: applyLocalPreferences(user), isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      const message = isNetworkError(error)
+        ? 'No se ha podido conectar. Comprueba tu conexión.'
+        : error instanceof Error ? error.message : 'No se ha podido aceptar la invitación.';
       set({ error: message, isLoading: false });
       throw error;
     }
   },
 
   logout: () => {
-    localStorage.removeItem('token');
-    set({ user: null, token: null });
+    void authApi.logout().catch(() => undefined);
+    localStorage.removeItem('session_hint');
+    set({ user: null, isAuthenticated: false });
   },
 
   loadProfile: async () => {
@@ -71,8 +102,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       const profile = await authApi.getProfile();
       set({ user: applyLocalPreferences(profile), isLoading: false });
     } catch {
-      localStorage.removeItem('token');
-      set({ user: null, token: null, isLoading: false });
+      localStorage.removeItem('session_hint');
+      set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
 

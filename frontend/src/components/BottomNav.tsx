@@ -15,10 +15,13 @@ const SHORT_LABELS: Record<string, string> = {
   [routes.settings]: 'Ajustes',
 };
 
-const LEFT_PATHS: readonly string[] = [routes.recipes, routes.mealPlan];
+const LEFT_PATHS: readonly string[] = [
+  routes.recipes,
+  routes.mealPlan,
+  routes.shoppingLists,
+];
 const RIGHT_PATHS: readonly string[] = [
   routes.pantry,
-  routes.shoppingLists,
   routes.health,
   routes.settings,
 ];
@@ -30,6 +33,12 @@ function isNavActive(
 ): boolean {
   if (match) return match(pathname);
   return pathname === path;
+}
+
+function itemsInOrder(paths: readonly string[]) {
+  return paths
+    .map((path) => MAIN_NAV_ITEMS.find((item) => item.path === path))
+    .filter((item): item is NonNullable<typeof item> => item !== undefined);
 }
 
 function SideNavLink({
@@ -57,6 +66,7 @@ function SideNavLink({
     >
       <span
         className="app-bottom-nav__icon"
+        aria-hidden="true"
         style={
           isActive
             ? ({ background: accent.bg, color: accent.text } as CSSProperties)
@@ -71,12 +81,10 @@ function SideNavLink({
 }
 
 export function BottomNav() {
-  const location = useLocation();
-  const pathname = location.pathname;
-
+  const { pathname } = useLocation();
   const homeItem = MAIN_NAV_ITEMS.find((item) => item.path === routes.dashboard)!;
-  const leftItems = MAIN_NAV_ITEMS.filter((item) => LEFT_PATHS.includes(item.path));
-  const rightItems = MAIN_NAV_ITEMS.filter((item) => RIGHT_PATHS.includes(item.path));
+  const leftItems = itemsInOrder(LEFT_PATHS);
+  const rightItems = itemsInOrder(RIGHT_PATHS);
   const homeActive = isNavActive(pathname, homeItem.path, homeItem.match);
 
   return (

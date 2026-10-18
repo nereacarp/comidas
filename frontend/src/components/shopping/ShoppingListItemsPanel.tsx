@@ -5,7 +5,7 @@ import { SectionEmptyState } from '../ui/SectionEmptyState';
 import { routes } from '../../lib/routes';
 import type { ListAccentStyle } from '../../lib/list-accents';
 import { listAccentCssVars } from '../../lib/list-accents';
-import type { GroupedItem } from '../../utils/shopping';
+import type { GroupedItem } from '../../lib/shopping';
 import type { PantryAdditionResult, PantryItem, StorageLocation } from '../../types';
 
 function sortByName(a: GroupedItem, b: GroupedItem): number {
