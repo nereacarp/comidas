@@ -2,7 +2,9 @@
 
 # Planificador de Comidas
 
-App web para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de la compra automáticamente y lleva el control de la despensa.
+App fullstack para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de compra automáticamente, controla tu despensa y monitorea tu salud.
+
+**[Ver en vivo](https://comidas-frontend.vercel.app)** · Demo: `demo@comidas.app` / `comidas123`
 
 <p>
   <img width="1920" height="898" alt="dashboard" src="https://github.com/user-attachments/assets/9fca1ffe-e62b-4342-b1ec-611888daf820" />
