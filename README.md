@@ -4,12 +4,6 @@
 
 App fullstack para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de compra automáticamente, controla tu despensa y monitorea tu salud.
 
-<div align="center">
-  <a href="https://comidas-frontend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Ver_en_Vivo-a8e6cf?style=for-the-badge&logo=google-chrome&logoColor=black" alt="Demo" /></a>
-</div>
-
-Demo: `demo@comidas.app` / `comidas123`
-
 <p>
   <img width="1920" height="898" alt="dashboard" src="https://github.com/user-attachments/assets/9fca1ffe-e62b-4342-b1ec-611888daf820" />
 </p>
@@ -80,9 +74,9 @@ comidas/
 ## Web en vivo
 
 <div align="center">
-  <a href="https://comidas-frontend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Frontend_Live-4CAF50?style=for-the-badge&logo=google-chrome&logoColor=white&color=a8e6cf" alt="Frontend Live" /></a>
-  <a href="https://comidas-backend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Backend_API-0077B6?style=for-the-badge&logo=fastify&logoColor=white" alt="Backend API" /></a>
-  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Deployment_Docs-FF9800?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Deployment Docs" /></a>
+  <a href="https://comidas-frontend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Frontend_Live-a8e6cf?style=for-the-badge&logo=google-chrome&logoColor=3d7a5c" alt="Frontend Live" /></a>
+  <a href="https://comidas-backend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Backend_API-2f6f82?style=for-the-badge&logo=fastify&logoColor=white" alt="Backend API" /></a>
+  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Deploy_Guide-f5a623?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Deploy Guide" /></a>
 </div>
 
 **Usuario demo:**
@@ -123,8 +117,6 @@ Contraseña: comidas123
 
 ## Variables de entorno
 
-_(Datos sensibles que la app necesita para funcionar pero que no se guardan en el código por seguridad)_
-
 El proyecto incluye un archivo `.env.example` con todas las variables necesarias pero sin valores reales. Antes de arrancar la app tienes que crear tu propio archivo `.env` copiando ese ejemplo y rellenando los valores:
 
 ```bash
@@ -136,15 +128,15 @@ Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archiv
 ## Documentación
 
 <div align="center">
-  <a href="docs/README.md" target="_blank"><img src="https://img.shields.io/badge/Guías-2196F3?style=for-the-badge&logo=markdown&logoColor=white" alt="Documentación" /></a>
-  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Release_Checklist-FF9800?style=for-the-badge&logo=checklist&logoColor=white" alt="Release Checklist" /></a>
-  <a href="docs/vercel-neon.md" target="_blank"><img src="https://img.shields.io/badge/Deploy_Guide-4CAF50?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy Guide" /></a>
+  <a href="docs/README.md" target="_blank"><img src="https://img.shields.io/badge/Guías-9bf6ff?style=for-the-badge&logo=markdown&logoColor=2f6f82" alt="Documentación" /></a>
+  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Release_Checklist-ffd8a8?style=for-the-badge&logo=checklist&logoColor=7a5a20" alt="Release Checklist" /></a>
+  <a href="docs/vercel-neon.md" target="_blank"><img src="https://img.shields.io/badge/Deploy_Guide-e6ccff?style=for-the-badge&logo=vercel&logoColor=5a4578" alt="Deploy Guide" /></a>
 </div>
 
 ## Licencia
 
 <div align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-ffadad?style=for-the-badge&color=ffadad&logoColor=9e4a4a" alt="MIT License" /></a>
 </div>
 
 <img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=a8e6cf&section=footer" width="100%" alt="footer-waves" />
