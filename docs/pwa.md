@@ -1,7 +1,25 @@
-# Funcionamiento sin conexión
+# Funcionamiento sin conexión (PWA)
 
-La aplicación instala un service worker y guarda en caché la interfaz estática (HTML, CSS, JavaScript e iconos). Así puede abrir la pantalla base cuando la red falla.
+## Cómo funciona Comidas sin conexión
 
-Las peticiones `/api` usan siempre la red. No se almacenan respuestas privadas ni se permiten cambios de recetas, planes, despensa o cuenta sin conexión. Esta decisión evita mostrar datos obsoletos o mezclar información entre usuarios.
+La app descarga y guarda en caché la interfaz (pantallas, estilos, iconos). Si se pierde la conexión, se puede abrir la app y ver la interfaz, pero sin datos.
 
-Por tanto, la versión actual es una PWA instalable con arranque sin conexión, no una aplicación de edición offline completa. Para ofrecer edición offline en el futuro habrá que diseñar una cola local cifrada, resolución de conflictos y separación estricta por usuario/hogar.
+## Qué funciona sin conexión
+
+- Ver la estructura y botones de la app
+- Instalar la app desde el navegador
+
+## Qué NO funciona sin conexión
+
+- Ver recetas, planes, lista de compra o despensa
+- Crear, editar o eliminar datos
+- Cambiar ajustes de cuenta
+
+Esta decisión es deliberada: es mejor mostrar nada que mostrar información desactualizada.
+
+## Futuro
+
+Si en el futuro se quiere editar sin conexión, habría que implementar:
+- Almacenamiento cifrado local
+- Cola de cambios que se sincronice al recuperar conexión
+- Resolución automática de conflictos si dos usuarios editan lo mismo

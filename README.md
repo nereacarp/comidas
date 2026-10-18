@@ -129,8 +129,8 @@ Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archiv
 
 <div align="center">
   <a href="docs/README.md" target="_blank"><img src="https://img.shields.io/badge/Guías-9bf6ff?style=for-the-badge&logo=markdown&logoColor=2f6f82" alt="Documentación" /></a>
-  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Release_Checklist-ffd8a8?style=for-the-badge&logo=checklist&logoColor=7a5a20" alt="Release Checklist" /></a>
-  <a href="docs/vercel-neon.md" target="_blank"><img src="https://img.shields.io/badge/Deploy_Guide-e6ccff?style=for-the-badge&logo=vercel&logoColor=5a4578" alt="Deploy Guide" /></a>
+  <a href="docs/vercel-neon.md" target="_blank"><img src="https://img.shields.io/badge/Despliegue_Vercel_Neon-e6ccff?style=for-the-badge&logo=vercel&logoColor=5a4578" alt="Deploy Guide" /></a>
+  <a href="docs/pwa.md" target="_blank"><img src="https://img.shields.io/badge/PWA_Sin_Conexión-ffd8a8?style=for-the-badge&logo=smartphone&logoColor=7a5a20" alt="PWA" /></a>
 </div>
 
 ## Licencia
