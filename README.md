@@ -4,7 +4,11 @@
 
 App fullstack para planificar menús semanales/mensuales en familia o individual. Gestiona recetas, genera listas de compra automáticamente, controla tu despensa y monitorea tu salud.
 
-**[Ver en vivo](https://comidas-frontend.vercel.app)** · Demo: `demo@comidas.app` / `comidas123`
+<div align="center">
+  <a href="https://comidas-frontend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Ver_en_Vivo-a8e6cf?style=for-the-badge&logo=google-chrome&logoColor=black" alt="Demo" /></a>
+</div>
+
+Demo: `demo@comidas.app` / `comidas123`
 
 <p>
   <img width="1920" height="898" alt="dashboard" src="https://github.com/user-attachments/assets/9fca1ffe-e62b-4342-b1ec-611888daf820" />
@@ -73,18 +77,19 @@ comidas/
 
 ---
 
-## 🚀 Web en vivo
+## Web en vivo
 
-La app está desplegada en producción:
-
-| Entorno | URL |
-|---------|-----|
-| **Frontend** | https://comidas-frontend.vercel.app |
-| **Backend API** | https://comidas-backend.vercel.app |
+<div align="center">
+  <a href="https://comidas-frontend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Frontend_Live-4CAF50?style=for-the-badge&logo=google-chrome&logoColor=white&color=a8e6cf" alt="Frontend Live" /></a>
+  <a href="https://comidas-backend.vercel.app" target="_blank"><img src="https://img.shields.io/badge/Backend_API-0077B6?style=for-the-badge&logo=fastify&logoColor=white" alt="Backend API" /></a>
+  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Deployment_Docs-FF9800?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Deployment Docs" /></a>
+</div>
 
 **Usuario demo:**
-- Email: `demo@comidas.app`
-- Contraseña: `comidas123`
+```
+Email: demo@comidas.app
+Contraseña: comidas123
+```
 
 ---
 
@@ -105,7 +110,7 @@ Una vez arrancado:
 | Frontend | http://localhost:5175 |
 | API | http://localhost:3001 |
 
-Puedes crear una cuenta desde la propia app o cargar los datos de demo con:
+Cargar datos de demo:
 
 ```bash
 docker compose exec backend pnpm db:seed
@@ -130,10 +135,16 @@ Abre el `.env` que acabas de crear y sustituye cada valor por el tuyo. El archiv
 
 ## Documentación
 
-Guías de despliegue, producción y pruebas en [`docs/`](docs/README.md).
+<div align="center">
+  <a href="docs/README.md" target="_blank"><img src="https://img.shields.io/badge/Guías-2196F3?style=for-the-badge&logo=markdown&logoColor=white" alt="Documentación" /></a>
+  <a href="docs/release-checklist.md" target="_blank"><img src="https://img.shields.io/badge/Release_Checklist-FF9800?style=for-the-badge&logo=checklist&logoColor=white" alt="Release Checklist" /></a>
+  <a href="docs/vercel-neon.md" target="_blank"><img src="https://img.shields.io/badge/Deploy_Guide-4CAF50?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy Guide" /></a>
+</div>
 
 ## Licencia
 
-[MIT](LICENSE)
+<div align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" /></a>
+</div>
 
 <img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=a8e6cf&section=footer" width="100%" alt="footer-waves" />
